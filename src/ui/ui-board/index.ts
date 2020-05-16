@@ -1,0 +1,1 @@
+export { UiBoard, UiBoardProps } from "./ui-board";

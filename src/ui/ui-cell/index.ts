@@ -1,0 +1,1 @@
+export { UiCell, UiCellProps } from "./ui-cell";

@@ -1,0 +1,96 @@
+@import "../../variables.scss";
+
+$cellModes: (
+    "letter-double": "letterDouble",
+    "letter-triple": "letterTriple",
+    "word-double": "wordDouble",
+    "word-triple": "wordTriple",
+    "standard": "standard",
+    "root": "root",
+);
+
+$cellColors: (
+    "standard": color("secondary3", 1),
+    "letterDouble": color("secondary1", 1),
+    "letterTriple": color("secondary1", 2),
+    "wordDouble": color("secondary2", 1),
+    "wordTriple": color("secondary2", 2),
+    "root": color("secondary3", 2),
+);
+
+$cellDescription: (
+    "standard": "",
+    "letterDouble": "2L",
+    "letterTriple": "3L",
+    "wordDouble": "2W",
+    "wordTriple": "3W",
+    "root": "🟆",
+);
+
+$cellFontSize: (50 / 15) + vw;
+
+.Cell {
+    height: percentage(1 / $boardSize);
+    width: percentage(1 / $boardSize);
+
+    border: 1px solid $white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+
+    font-weight: $bold;
+    font-size: #{$cellFontSize};
+
+    user-select: none;
+
+    &--content {
+        background-color: color("primary", 1);
+        border-radius: 3px;
+        color: color("primary", 4);
+        position: relative;
+        display: flex;
+        justify-content: center;
+
+        & > .Cell__letter {
+            position: absolute;
+            font-size: calc(#{$cellFontSize} * 0.9);
+        }
+
+        & > .Cell__points {
+            position: absolute;
+            color: lighten(color("primary", 2), 35%);
+            font-size: calc(#{$cellFontSize} * 0.5);
+            bottom: 2px;
+            line-height: 1;
+            text-align: right;
+            right: 2px;
+        }
+    }
+
+    &--empty {
+        & > .Cell__points {
+            display: none;
+        }
+
+        @each $className, $modeName in $cellModes {
+            $color: map-get($cellColors, $modeName);
+
+            &.Cell--#{$className} {
+                background-color: lighten($color, 10%);
+
+                &::after {
+                    content: map-get($cellDescription, $modeName);
+                    color: $white;
+                }
+            }
+
+            &.Cell--root {
+                &::after {
+                    font-size: calc(#{$cellFontSize} * 1.5);
+                    padding-top: calc(#{$cellFontSize} * 0.15);
+                }
+            }
+        }
+    }
+}
