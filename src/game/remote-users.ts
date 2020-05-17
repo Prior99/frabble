@@ -1,7 +1,7 @@
 import { observable, computed, action } from "mobx";
-import { RemoteUser } from "./types";
+import { RemoteUser } from "../types";
 import { v4 } from "uuid";
-import { generateUserName } from "./utils";
+import { generateUserName } from "../utils";
 
 export class RemoteUsers {
     @observable public users = new Map<string, RemoteUser>();

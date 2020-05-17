@@ -8,8 +8,9 @@ import {
     RemoteUser,
     HostMessageType,
     HostMessage,
+    GameConfig,
 } from "../types";
-import { RemoteUsers } from "../remote-users";
+import { RemoteUsers } from "../game";
 
 @external
 export class Host extends Peer {
@@ -67,7 +68,7 @@ export class Host extends Peer {
                     userId = message.user.id;
                     this.sendToPeer(connection, {
                         message: HostMessageType.WELCOME,
-                        users: this.remoteUsers.all.map((user) => user),
+                        users: this.remoteUsers.all,
                     });
                     this.connections.set(userId, connection);
                     console.info(`Client connected and was greeted: ${message.user.id} (${message.user.id})`);
@@ -116,9 +117,10 @@ export class Host extends Peer {
         });
     }
 
-    @bind public sendGameStart() {
+    @bind public sendGameStart(config: GameConfig) {
         this.broadcastMessage({
             message: HostMessageType.GAME_START,
+            config,
         });
     }
 }

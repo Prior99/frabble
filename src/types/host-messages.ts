@@ -1,4 +1,5 @@
 import { RemoteUser } from "./remote-user";
+import { GameConfig } from "./game-config";
 
 export enum HostMessageType {
     WELCOME = "welcome",
@@ -24,6 +25,7 @@ export interface HostMessageUserDisconnected {
 
 export interface HostMessageGameStart {
     message: HostMessageType.GAME_START;
+    config: GameConfig;
 }
 
 

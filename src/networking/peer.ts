@@ -8,6 +8,7 @@ import {
     HostMessageType,
     ClientMessageType,
     ClientMessage,
+    GameConfig,
 } from "../types";
 import { observable } from "mobx";
 
@@ -19,7 +20,7 @@ export abstract class Peer extends EventEmitter {
     public onWelcome = this.registerEvent<(users: RemoteUser[]) => void>();
     public onUserConnected = this.registerEvent<(user: RemoteUser) => void>();
     public onUserDisconnected = this.registerEvent<(userId: string) => void>();
-    public onGameStart = this.registerEvent<() => void>();
+    public onGameStart = this.registerEvent<(config: GameConfig) => void>();
 
     protected abstract sendClientMessage(message: ClientMessage): void;
 
@@ -33,7 +34,7 @@ export abstract class Peer extends EventEmitter {
             case HostMessageType.USER_DISCONNECTED:
                 return this.emit(this.onUserDisconnected, message.userId);
             case HostMessageType.GAME_START:
-                return this.emit(this.onGameStart);
+                return this.emit(this.onGameStart, message.config);
         }
     }
 

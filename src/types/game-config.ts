@@ -1,8 +1,9 @@
-export const enum Dictionary {
+export const enum Language {
     GERMAN = "german",
+    ENGLISH = "english",
 }
 
 export interface GameConfig {
-    dictionary: Dictionary;
+    language: Language;
     timeLimit?: number;
 }

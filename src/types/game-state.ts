@@ -1,4 +1,4 @@
-export const enum GameStateType {
+export const enum GameState {
     LOBBY = "lobby",
     STARTED = "started",
 }
