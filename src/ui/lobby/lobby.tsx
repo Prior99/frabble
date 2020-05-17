@@ -138,33 +138,39 @@ export class Lobby extends React.Component<LobbyProps> {
                                         />
                                     ))}
                                 </List>
-                                <h2>Options</h2>
-                                <Form>
-                                    <Form.Field disabled={!this.isHost}>
-                                        <label>Language</label>
-                                        <Dropdown
-                                            selection
-                                            value={this.language}
-                                            options={this.languageOptions}
-                                            onChange={this.handleLanguageChange}
-                                        />
-                                    </Form.Field>
-                                    <Form.Field disabled={!this.isHost}>
-                                        <label>Use timer</label>
-                                        <Checkbox
-                                            toggle
-                                            checked={this.timeLimitEnabled}
-                                            onChange={this.handleTimeLimitToggle}
-                                        />
-                                    </Form.Field>
-                                    <Form.Field disabled={!this.timeLimitEnabled || !this.isHost}>
-                                        <label>Time limit (seconds)</label>
-                                        <Input value={this.timeLimit} onChange={this.handleTimeLimitChange} />
-                                    </Form.Field>
-                                    <Form.Button disabled={!this.isHost} primary fluid onClick={this.handleStartClick}>
-                                        Start
-                                    </Form.Button>
-                                </Form>
+                                {this.isHost ? (
+                                    <>
+                                        <h2>Options</h2>
+                                        <Form>
+                                            <Form.Field>
+                                                <label>Language</label>
+                                                <Dropdown
+                                                    selection
+                                                    value={this.language}
+                                                    options={this.languageOptions}
+                                                    onChange={this.handleLanguageChange}
+                                                />
+                                            </Form.Field>
+                                            <Form.Field>
+                                                <label>Use timer</label>
+                                                <Checkbox
+                                                    toggle
+                                                    checked={this.timeLimitEnabled}
+                                                    onChange={this.handleTimeLimitToggle}
+                                                />
+                                            </Form.Field>
+                                            <Form.Field disabled={!this.timeLimitEnabled}>
+                                                <label>Time limit (seconds)</label>
+                                                <Input value={this.timeLimit} onChange={this.handleTimeLimitChange} />
+                                            </Form.Field>
+                                            <Form.Button primary fluid onClick={this.handleStartClick}>
+                                                Start
+                                            </Form.Button>
+                                        </Form>
+                                    </>
+                                ) : (
+                                    <p>Please wait <b>patiently</b> for the host to start the game...</p>
+                                )}
                             </Segment>
                         </Grid.Column>
                     </Grid.Row>

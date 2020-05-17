@@ -9,18 +9,32 @@ import {
     ClientMessageType,
     ClientMessage,
     GameConfig,
+    Letter,
+    BaseClientMessage,
 } from "../types";
 import { observable } from "mobx";
+import { invariant } from "mobx/lib/internal";
+import { Vec2, vec2 } from "../utils";
+import { RemoteUsers } from "../game";
 
 export abstract class Peer extends EventEmitter {
     protected peer?: PeerJS;
     @observable public peerId = v4();
     @observable public networkId: string | undefined = undefined;
 
+
+    constructor(protected remoteUsers: RemoteUsers) {
+        super();
+    }
+
     public onWelcome = this.registerEvent<(users: RemoteUser[]) => void>();
     public onUserConnected = this.registerEvent<(user: RemoteUser) => void>();
     public onUserDisconnected = this.registerEvent<(userId: string) => void>();
     public onGameStart = this.registerEvent<(config: GameConfig) => void>();
+    public onLetterRemove = this.registerEvent<(position: Vec2) => void>();
+    public onLetterPlace = this.registerEvent<(position: Vec2, letter: Letter) => void>();
+    public onPass = this.registerEvent<(letters: Letter[]) => void>();
+    public onEndTurn = this.registerEvent<() => void>();
 
     protected abstract sendClientMessage(message: ClientMessage): void;
 
@@ -35,6 +49,19 @@ export abstract class Peer extends EventEmitter {
                 return this.emit(this.onUserDisconnected, message.userId);
             case HostMessageType.GAME_START:
                 return this.emit(this.onGameStart, message.config);
+            case HostMessageType.RELAYED_CLIENT_MESSAGE:
+                const { clientMessage } = message;
+                switch (clientMessage.message) {
+                    case ClientMessageType.LETTER_PLACE:
+                        return this.emit(this.onLetterPlace, vec2(...clientMessage.position), clientMessage.letter);
+                    case ClientMessageType.LETTER_REMOVE:
+                        return this.emit(this.onLetterRemove, vec2(...clientMessage.position));
+                    case ClientMessageType.PASS:
+                        return this.emit(this.onPass, clientMessage.letters);
+                    case ClientMessageType.END_TURN:
+                        return this.emit(this.onEndTurn);
+                    default: invariant(clientMessage.message);
+                }
         }
     }
 
@@ -57,7 +84,7 @@ export abstract class Peer extends EventEmitter {
         return this.peer.id;
     }
 
-    @bind protected sendToPeer(connection: PeerJS.DataConnection, message: HostMessage | ClientMessage): void {
+    @bind protected sendToPeer(connection: PeerJS.DataConnection, message: HostMessage | (ClientMessage & BaseClientMessage)): void {
         connection.send(message);
     }
 
@@ -65,7 +92,34 @@ export abstract class Peer extends EventEmitter {
         this.sendClientMessage({
             message: ClientMessageType.HELLO,
             user,
-            originPeerId: this.peerId,
+        });
+    }
+
+    @bind public sendLetterPlace(position: Vec2, letter: Letter): void {
+        this.sendClientMessage({
+            message: ClientMessageType.LETTER_PLACE,
+            position: [position.x, position.y],
+            letter,
+        });
+    }
+
+    @bind public sendLetterRemove(position: Vec2): void {
+        this.sendClientMessage({
+            message: ClientMessageType.LETTER_REMOVE,
+            position: [position.x, position.y],
+        });
+    }
+
+    @bind public sendPass(letters: Letter[]): void {
+        this.sendClientMessage({
+            message: ClientMessageType.PASS,
+            letters,
+        });
+    }
+
+    @bind public sendEndTurn(): void {
+        this.sendClientMessage({
+            message: ClientMessageType.END_TURN,
         });
     }
 }

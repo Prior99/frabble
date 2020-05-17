@@ -3,24 +3,45 @@ import { Letter } from "../types";
 
 export enum ClientMessageType {
     HELLO = "hello",
-    PLACE_LETTER = "place letter",
+    LETTER_PLACE = "letter place",
+    LETTER_REMOVE = "letter remove",
+    PASS = "pass",
+    END_TURN = "end turn",
 }
 
 export interface BaseClientMessage {
     originPeerId: string;
+    originUserId: string;
 }
 
-export interface ClientMessageHello extends BaseClientMessage {
+export interface ClientMessageHello {
     message: ClientMessageType.HELLO;
     user: RemoteUser;
 }
 
-export interface ClientMessageGameStateChange extends BaseClientMessage  {
-    message: ClientMessageType.PLACE_LETTER;
+export interface ClientMessagePass {
+    message: ClientMessageType.PASS;
+    letters: Letter[];
+}
+
+export interface ClientMessageLetterPlace {
+    message: ClientMessageType.LETTER_PLACE;
     letter: Letter;
     position: [number, number];
 }
 
+export interface ClientMessageLetterRemove {
+    message: ClientMessageType.LETTER_REMOVE;
+    position: [number, number];
+}
+
+export interface ClientMessageEndTurn {
+    message: ClientMessageType.END_TURN;
+}
+
 export type ClientMessage =
     | ClientMessageHello
-    | ClientMessageGameStateChange;
+    | ClientMessageEndTurn
+    | ClientMessageLetterPlace
+    | ClientMessageLetterRemove
+    | ClientMessagePass;

@@ -1,6 +1,7 @@
 import { Cell, CellMode, Letter } from "../types";
 import { Vec2, vec2 ,rect, RectIteratorOrder } from "../utils";
-import { observable } from "mobx";
+import { observable, action } from "mobx";
+import { stringifyKey } from "mobx/lib/internal";
 
 export type BoardIterator = Generator<{
     cell: Cell;
@@ -10,6 +11,7 @@ export type BoardIterator = Generator<{
 
 export class Board {
     @observable private cells: Cell[] = new Array(15 * 15).fill({ empty: true });
+    private readonly rect = rect(-7, -7, 15, 15);
 
     constructor() {
         this.cells[17] = {
@@ -38,7 +40,26 @@ export class Board {
         };
     }
 
-    private readonly rect = rect(-7, -7, 15, 15);
+    @action.bound public clear() {
+        this.cells = this.cells.fill({ empty: true });
+    }
+
+    @action.bound public placeLetter(pos: Vec2, letter: Letter, playerId: string, turn: number): void {
+        this.cells[this.rect.toIndex(pos)] = {
+            empty: false,
+            playerId,
+            turn,
+            letter,
+        };
+    }
+
+    @action.bound public remove(pos: Vec2): Cell {
+        const cell = this.at(pos);
+        this.cells[this.rect.toIndex(pos)] = {
+            empty: true,
+        };
+        return cell;
+    }
 
     public at(pos: Vec2): Cell {
         return this.cells[this.rect.toIndex(pos)];

@@ -2,22 +2,23 @@ import PeerJS from "peerjs";
 import { Peer } from "./peer";
 import { bind } from "bind-decorator";
 import { ClientMessage, RemoteUser } from "../types";
+import { RemoteUsers } from "../game";
 
 export class Client extends Peer {
     private connection?: PeerJS.DataConnection;
 
     @bind protected sendClientMessage(message: ClientMessage): void {
         if (!this.connection) { throw new Error("Can't send message: Connection is closed."); }
-        this.sendToPeer(this.connection, message);
+        this.sendToPeer(this.connection, { ...message, originPeerId: this.peerId, originUserId: this.remoteUsers.ownUser.id });
     }
 
-    @bind public async connect(networkId: string, ownUser: RemoteUser): Promise<void> {
+    @bind public async connect(networkId: string): Promise<void> {
         await this.open();
         await new Promise(resolve => {
             this.connection = this.peer!.connect(networkId!, { reliable: true });
             this.connection.on("open", () => {
                 this.connection!.on("data", data => this.handleHostMessage(data));
-                this.sendHello(ownUser);
+                this.sendHello(this.remoteUsers.ownUser);
                 resolve();
             });
         });
@@ -25,8 +26,8 @@ export class Client extends Peer {
     }
 }
 
-export async function createClient(networkId: string, user: RemoteUser): Promise<Client> {
-    const client = new Client();
-    await client.connect(networkId, user);
+export async function createClient(networkId: string, users: RemoteUsers): Promise<Client> {
+    const client = new Client(users);
+    await client.connect(networkId);
     return client;
 }

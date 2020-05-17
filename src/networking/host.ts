@@ -9,16 +9,12 @@ import {
     HostMessageType,
     HostMessage,
     GameConfig,
+    BaseClientMessage,
 } from "../types";
-import { RemoteUsers } from "../game";
 
 @external
 export class Host extends Peer {
     private connections = new Map<string, PeerJS.DataConnection>();
-
-    constructor(private remoteUsers: RemoteUsers) {
-        super();
-    }
 
     @bind private broadcastMessage(message: HostMessage): void {
         for (const connection of this.connections.values()) {
@@ -27,27 +23,25 @@ export class Host extends Peer {
         this.handleHostMessage(message);
     }
 
-    @bind protected handleClientMessage(userId: string, message: ClientMessage): void {
+    @bind protected handleClientMessage(userId: string, message: ClientMessage & BaseClientMessage): void {
         console.info(`Received client message from ${userId}:`, message);
         switch (message.message) {
-            // case ClientMessageType.GAME_STATE_CHANGE:
-            //     this.emit(this.onClientGameStateChanged, userId, message.gameState);
-            //     this.broadcastMessage({
-            //         message: HostMessageType.RELAYED_GAME_STATE_CHANGE,
-            //         gameState:
-            //             message.gameState.state === GameStateType.DRAWING_DONE
-            //                 ? omit(["data"], message.gameState)
-            //                 : message.gameState,
-            //         userId,
-            //     });
-            //     return;
+            case ClientMessageType.END_TURN:
+            case ClientMessageType.LETTER_PLACE:
+            case ClientMessageType.LETTER_REMOVE:
+            case ClientMessageType.PASS:
+                this.broadcastMessage({
+                    message: HostMessageType.RELAYED_CLIENT_MESSAGE,
+                    clientMessage: message,
+                })
+                return;
             default:
                 throw new Error(`Received unexpected message from client with type: ${message.message}`);
         }
     }
 
     @bind protected sendClientMessage(message: ClientMessage): void {
-        this.handleClientMessage(this.remoteUsers.ownUser.id, message);
+        this.handleClientMessage(this.remoteUsers.ownUser.id, { ...message, originPeerId: this.peerId, originUserId: this.remoteUsers.ownUser.id });
     }
 
     @bind public async host(): Promise<void> {

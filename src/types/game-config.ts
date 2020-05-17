@@ -6,4 +6,5 @@ export const enum Language {
 export interface GameConfig {
     language: Language;
     timeLimit?: number;
+    seed: string;
 }
