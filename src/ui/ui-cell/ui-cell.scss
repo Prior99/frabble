@@ -90,4 +90,8 @@ $cellFontSize: (50 / 15) + vw;
             }
         }
     }
+
+    &--dropHover {
+        background-color: red;
+    }
 }

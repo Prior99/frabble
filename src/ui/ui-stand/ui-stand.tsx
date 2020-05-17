@@ -2,9 +2,9 @@ import * as React from "react";
 import { observer } from "mobx-react";
 import { external, inject } from "tsdi";
 import { Game } from "../../game";
-import { computed } from "mobx";
+import { computed, action } from "mobx";
 import classnames from "classnames";
-import { UiCell } from "../ui-cell";
+import { UiCell, UiCellDragMode } from "../ui-cell";
 import { CellMode } from "../../types";
 import "./ui-stand.scss";
 
@@ -30,6 +30,10 @@ export class UiStand extends React.Component<UiStandProps> {
         return classnames("Stand", this.props.className);
     }
 
+    @action.bound private onPlaceLetter(index: number) {
+        this.stand?.letterRemove(index);
+    }
+
     public render(): JSX.Element {
         return (
             <div className={this.classNames}>
@@ -39,6 +43,9 @@ export class UiStand extends React.Component<UiStandProps> {
                         cell={{ empty: false, letter, playerId: this.props.userId, turn: this.game.turn }}
                         mode={CellMode.STANDARD}
                         className="Stand__cell"
+                        dragMode={UiCellDragMode.SOURCE}
+                        index={index}
+                        onDrop={this.onPlaceLetter}
                     />
                 ))}
             </div>

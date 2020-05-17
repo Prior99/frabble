@@ -8,3 +8,4 @@ export * from "./game-config";
 export * from "./letter";
 export * from "./cell";
 export * from "./cell-mode";
+export * from "./dnd";

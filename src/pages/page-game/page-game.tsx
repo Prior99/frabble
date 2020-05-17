@@ -2,12 +2,16 @@ import * as React from "react";
 import { addRoute, RouteProps } from "../../routing";
 import { external, inject } from "tsdi";
 import { observer } from "mobx-react";
+// import { DndProvider} from "react-dnd-multi-backend";
+// import HTML5ToTouch from "react-dnd-multi-backend/dist/esm/HTML5toTouch";
 import { LobbyMode, GameState } from "../../types";
 import "./page-game.scss";
 import { Game } from "../../game";
 import { invariant } from "../../utils";
 import { Lobby, UiBoard } from "../../ui";
 import { UiStand } from "../../ui/ui-stand";
+import { DndProvider } from "react-dnd";
+import Backend from 'react-dnd-html5-backend'
 
 export interface PageGameProps {
     lobbyMode: LobbyMode;
@@ -33,10 +37,11 @@ export class PageGame extends React.Component<RouteProps<PageGameProps>> {
                 return <Lobby className="PageGame__lobby" />;
             case GameState.STARTED:
                 return (
-                    <>
+                    <DndProvider backend={Backend}>
+
                         <UiBoard className="PageGame__board" />
                         <UiStand userId={this.game.users.ownUser.id} className="PageGame__stand"/>
-                    </>
+                    </DndProvider>
                 );
             default:
                 invariant(this.game.state);

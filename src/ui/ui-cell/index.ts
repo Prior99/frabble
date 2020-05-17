@@ -1,1 +1,1 @@
-export { UiCell, UiCellProps } from "./ui-cell";
+export { UiCell, UiCellProps, UiCellDragMode } from "./ui-cell";
