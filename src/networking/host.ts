@@ -11,6 +11,7 @@ import {
     GameConfig,
     BaseClientMessage,
 } from "../types";
+import { RemoteUsers } from "../game";
 
 @external
 export class Host extends Peer {
@@ -56,7 +57,7 @@ export class Host extends Peer {
     @bind private handleConnect(connection: PeerJS.DataConnection): void {
         let userId: string;
         connection.on("data", json => {
-            const message: ClientMessage = json;
+            const message: ClientMessage & BaseClientMessage = json;
             switch (message.message) {
                 case ClientMessageType.HELLO:
                     userId = message.user.id;

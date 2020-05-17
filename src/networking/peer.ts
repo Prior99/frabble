@@ -13,8 +13,7 @@ import {
     BaseClientMessage,
 } from "../types";
 import { observable } from "mobx";
-import { invariant } from "mobx/lib/internal";
-import { Vec2, vec2 } from "../utils";
+import { Vec2, vec2, invariant } from "../utils";
 import { RemoteUsers } from "../game";
 
 export abstract class Peer extends EventEmitter {
@@ -31,9 +30,9 @@ export abstract class Peer extends EventEmitter {
     public onUserConnected = this.registerEvent<(user: RemoteUser) => void>();
     public onUserDisconnected = this.registerEvent<(userId: string) => void>();
     public onGameStart = this.registerEvent<(config: GameConfig) => void>();
-    public onLetterRemove = this.registerEvent<(position: Vec2) => void>();
-    public onLetterPlace = this.registerEvent<(position: Vec2, letter: Letter) => void>();
-    public onPass = this.registerEvent<(letters: Letter[]) => void>();
+    public onLetterRemove = this.registerEvent<(position: Vec2, targetLetterIndex: number | undefined) => void>();
+    public onLetterPlace = this.registerEvent<(position: Vec2, sourceLetterIndex: number) => void>();
+    public onPass = this.registerEvent<(indices: number[]) => void>();
     public onEndTurn = this.registerEvent<() => void>();
 
     protected abstract sendClientMessage(message: ClientMessage): void;
@@ -53,14 +52,16 @@ export abstract class Peer extends EventEmitter {
                 const { clientMessage } = message;
                 switch (clientMessage.message) {
                     case ClientMessageType.LETTER_PLACE:
-                        return this.emit(this.onLetterPlace, vec2(...clientMessage.position), clientMessage.letter);
+                        return this.emit(this.onLetterPlace, vec2(...clientMessage.position), clientMessage.sourceLetterIndex);
                     case ClientMessageType.LETTER_REMOVE:
-                        return this.emit(this.onLetterRemove, vec2(...clientMessage.position));
+                        return this.emit(this.onLetterRemove, vec2(...clientMessage.position), clientMessage.targetLetterIndex);
                     case ClientMessageType.PASS:
-                        return this.emit(this.onPass, clientMessage.letters);
+                        return this.emit(this.onPass, clientMessage.exchangedLetterIndices);
                     case ClientMessageType.END_TURN:
                         return this.emit(this.onEndTurn);
-                    default: invariant(clientMessage.message);
+                    case ClientMessageType.HELLO:
+                        throw new Error("Hello message must not be relayed.");
+                    default: invariant(clientMessage);
                 }
         }
     }
@@ -95,25 +96,26 @@ export abstract class Peer extends EventEmitter {
         });
     }
 
-    @bind public sendLetterPlace(position: Vec2, letter: Letter): void {
+    @bind public sendLetterPlace(position: Vec2, sourceLetterIndex: number): void {
         this.sendClientMessage({
             message: ClientMessageType.LETTER_PLACE,
             position: [position.x, position.y],
-            letter,
+            sourceLetterIndex,
         });
     }
 
-    @bind public sendLetterRemove(position: Vec2): void {
+    @bind public sendLetterRemove(position: Vec2, targetLetterIndex: number | undefined): void {
         this.sendClientMessage({
             message: ClientMessageType.LETTER_REMOVE,
             position: [position.x, position.y],
+            targetLetterIndex
         });
     }
 
-    @bind public sendPass(letters: Letter[]): void {
+    @bind public sendPass(exchangedLetterIndices: number[]): void {
         this.sendClientMessage({
             message: ClientMessageType.PASS,
-            letters,
+            exchangedLetterIndices,
         });
     }
 

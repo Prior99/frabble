@@ -21,18 +21,19 @@ export interface ClientMessageHello {
 
 export interface ClientMessagePass {
     message: ClientMessageType.PASS;
-    letters: Letter[];
+    exchangedLetterIndices: number[];
 }
 
 export interface ClientMessageLetterPlace {
     message: ClientMessageType.LETTER_PLACE;
-    letter: Letter;
+    sourceLetterIndex: number;
     position: [number, number];
 }
 
 export interface ClientMessageLetterRemove {
     message: ClientMessageType.LETTER_REMOVE;
     position: [number, number];
+    targetLetterIndex?: number;
 }
 
 export interface ClientMessageEndTurn {

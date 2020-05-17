@@ -40,11 +40,11 @@ export class Board {
         };
     }
 
-    @action.bound public clear() {
+    @action.bound public initialize() {
         this.cells = this.cells.fill({ empty: true });
     }
 
-    @action.bound public placeLetter(pos: Vec2, letter: Letter, playerId: string, turn: number): void {
+    @action.bound public letterPlace(pos: Vec2, letter: Letter, playerId: string, turn: number): void {
         this.cells[this.rect.toIndex(pos)] = {
             empty: false,
             playerId,
@@ -53,7 +53,7 @@ export class Board {
         };
     }
 
-    @action.bound public remove(pos: Vec2): Cell {
+    @action.bound public letterRemove(pos: Vec2): Cell {
         const cell = this.at(pos);
         this.cells[this.rect.toIndex(pos)] = {
             empty: true,

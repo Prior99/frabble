@@ -10,6 +10,7 @@ import { Board } from "../game-logic";
 import { LetterBag } from "../game-logic/letter-bag";
 import { prop } from "ramda";
 import { shuffle, Vec2 } from "../utils";
+import { Stand } from "../game-logic/stand";
 
 @component
 export class Game {
@@ -25,6 +26,7 @@ export class Game {
     @observable public turnOrder: string[] = [];
     @observable public turn = 0;
     @observable public scores = new Map<string, number>();
+    @observable public stands = new Map<string, Stand>();
 
     @computed public get networkMode() {
         if (!this.peer) {
@@ -46,6 +48,14 @@ export class Game {
             throw new Error(`Inconsistency: User ${this.currentUserId} is unknown.`);
         }
         return user;
+    }
+
+    @computed public get currentStand(): Stand {
+        const stand = this.stands.get(this.currentUserId);
+        if (!stand) {
+            throw new Error(`Inconsistency: User ${this.currentUserId} is unknown.`);
+        }
+        return stand;
     }
 
     @action.bound public startGame() {
@@ -78,22 +88,45 @@ export class Game {
             this.board.initialize();
             const rng = randomSeed(config.seed);
             this.letterBag.initialize(config.seed);
-            this.turnOrder = shuffle(this.users.all.map(prop("id")), () => rng.floatBetween(0, 1));
-            this.users.all.map(prop("id")).forEach(id => this.scores.set(id, 0));
+            this.turnOrder = shuffle(this.users.all.map(prop("id")).sort(), () => rng.floatBetween(0, 1));
+            this.turnOrder.forEach(id => {
+                this.scores.set(id, 0);
+
+                const stand = new Stand(this.letterBag.takeMany(Stand.MAX_LETTERS));
+                this.stands.set(id, stand);
+            });
             this.turn = 0;
         }));
-        this.peer.onLetterPlace(action((pos: Vec2, letter: Letter) => {
+        this.peer.onLetterPlace(action((pos: Vec2, sourceLetterIndex: number) => {
+            const [letter] = this.currentStand.letterRemove(sourceLetterIndex);
             this.board.letterPlace(pos, letter, this.currentUserId, this.turn);
         }));
-        this.peer.onLetterRemove(action((pos: Vec2) => {
-            this.board.letterRemove(pos);
+        this.peer.onLetterRemove(action((pos: Vec2, targetIndex: number | undefined) => {
+            const cell = this.board.letterRemove(pos);
+
+            if (cell.empty) {
+                throw new Error("Cannot remove letter from empty cell.");
+            }
+
+            const { letter } = cell;
+            if (targetIndex === undefined) {
+                this.currentStand.letterAdd(letter);
+            } else {
+                this.currentStand.letterAddAt(targetIndex, letter);
+            }
         }));
         this.peer.onEndTurn(action(() => {
             this.awardScore();
+            const newLetters = this.letterBag.takeMany(this.currentStand.missingLetterCount);
+            this.currentStand.letterAdd(...newLetters);
+
             this.turn++;
         }));
-        this.peer.onPass(action((letters: Letter[]) => {
-            this.letterBag.exchange(...letters)
+        this.peer.onPass(action((exchangedLetterIndices: number[]) => {
+            const removedLetters = this.currentStand.letterRemove(...exchangedLetterIndices);
+            const newLetters = this.letterBag.exchange(...removedLetters);
+
+            this.currentStand.letterAdd(...newLetters);
         }));
 
         if (this.peer instanceof Host) {
