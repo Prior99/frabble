@@ -6,7 +6,8 @@ import { LobbyMode, GameState } from "../../types";
 import "./page-game.scss";
 import { Game } from "../../game";
 import { invariant } from "../../utils";
-import { Lobby, UiBoard  } from "../../ui";
+import { Lobby, UiBoard } from "../../ui";
+import { UiStand } from "../../ui/ui-stand";
 
 export interface PageGameProps {
     lobbyMode: LobbyMode;
@@ -26,13 +27,17 @@ export class PageGame extends React.Component<RouteProps<PageGameProps>> {
         }
     }
 
-
     public render(): JSX.Element {
         switch (this.game.state) {
             case GameState.LOBBY:
                 return <Lobby className="PageGame__lobby" />;
             case GameState.STARTED:
-                return <UiBoard className="PageGame__board" />;
+                return (
+                    <>
+                        <UiBoard className="PageGame__board" />
+                        <UiStand userId={this.game.users.ownUser.id} className="PageGame__stand"/>
+                    </>
+                );
             default:
                 invariant(this.game.state);
         }

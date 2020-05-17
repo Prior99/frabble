@@ -1,0 +1,11 @@
+
+.Stand {
+    display: flex;
+    justify-content: center;
+
+    &__cell {
+        $size: 7vw;
+        width: $size;
+        height: $size;
+    }
+}

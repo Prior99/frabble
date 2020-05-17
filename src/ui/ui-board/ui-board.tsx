@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { UiCell } from "../ui-cell";
 import { Board } from "../../game-logic/board";
 import { computed } from "mobx";

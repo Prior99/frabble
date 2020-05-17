@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { Cell, CellMode } from "../../types";
 import { observer } from "mobx-react";
 import classnames from "classnames";

@@ -30,9 +30,6 @@ $cellDescription: (
 $cellFontSize: (50 / 15) + vw;
 
 .Cell {
-    height: percentage(1 / $boardSize);
-    width: percentage(1 / $boardSize);
-
     border: 1px solid $white;
     display: flex;
     justify-content: center;
