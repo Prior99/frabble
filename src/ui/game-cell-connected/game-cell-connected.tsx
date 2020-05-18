@@ -55,7 +55,7 @@ export class GameCellConnected extends React.Component<GameCellConnectedProps> {
             case CellPositionType.BOARD:
                 return this.game.board.cellModeAt(position.position);
             case CellPositionType.STAND:
-                return CellMode.STANDARD;
+                return CellMode.STAND;
             default: invariant(position);
         }
     }

@@ -11,6 +11,8 @@ import { invariant } from "../../utils";
 import { Lobby, GameBoard, GameStand } from "../../ui";
 import { DndProvider } from "react-dnd";
 import Backend from 'react-dnd-html5-backend'
+import { Button } from "semantic-ui-react";
+import { action } from "mobx";
 
 export interface PageGameProps {
     lobbyMode: LobbyMode;
@@ -30,6 +32,10 @@ export class PageGame extends React.Component<RouteProps<PageGameProps>> {
         }
     }
 
+    @action.bound private handleCommit() {
+        this.game.endTurn();
+    }
+
     public render(): JSX.Element {
         switch (this.game.state) {
             case GameState.LOBBY:
@@ -37,9 +43,9 @@ export class PageGame extends React.Component<RouteProps<PageGameProps>> {
             case GameState.STARTED:
                 return (
                     <DndProvider backend={Backend}>
-
                         <GameBoard className="PageGame__board" />
                         <GameStand playerId={this.game.users.ownUser.id} className="PageGame__stand"/>
+                        <Button content="Commit" onClick={this.handleCommit} />
                     </DndProvider>
                 );
             default:

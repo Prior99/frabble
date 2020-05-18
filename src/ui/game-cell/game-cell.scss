@@ -7,6 +7,7 @@ $cellModes: (
     "word-triple": "wordTriple",
     "standard": "standard",
     "root": "root",
+    "stand": "stand",
 );
 
 $cellColors: (
@@ -16,6 +17,7 @@ $cellColors: (
     "wordDouble": color("secondary2", 1),
     "wordTriple": color("secondary2", 2),
     "root": color("secondary3", 2),
+    "stand": lighten(color("primary", 1), 10%),
 );
 
 $cellDescription: (
@@ -25,6 +27,7 @@ $cellDescription: (
     "wordDouble": "2W",
     "wordTriple": "3W",
     "root": "🟆",
+    "stand": "",
 );
 
 $cellFontSize: (50 / 15) + vw;

@@ -5,4 +5,5 @@ export const enum CellMode {
     WORD_DOUBLE = "word-double",
     WORD_TRIPLE = "word-triple",
     ROOT = "root",
+    STAND = "stand",
 }

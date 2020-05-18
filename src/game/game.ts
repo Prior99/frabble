@@ -89,6 +89,10 @@ export class Game {
         }
     }
 
+    @action.bound public endTurn() {
+        this.peer?.sendEndTurn();
+    }
+
     @action.bound public async initialize(networkId?: string): Promise<void> {
         const Ctor = typeof networkId === "string" ? Client : Host;
         this.peer = new Ctor(this.users);
