@@ -46,7 +46,7 @@ $cellFontSize: (50 / 15) + vw;
 
     &--content {
         background-color: color("primary", 1);
-        border-radius: 3px;
+        border-radius: 2px;
         border-color: lighten(color("primary", 1), 10%);
         color: color("primary", 4);
         position: relative;
