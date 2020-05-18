@@ -2,20 +2,11 @@ import * as React from "react";
 import { observer } from "mobx-react";
 import { external, inject } from "tsdi";
 import { Game } from "../../game";
-import { computed, action } from "mobx";
+import { computed } from "mobx";
 import classnames from "classnames";
-import {
-    GameCellDnd,
-    GameCellDndMode,
-    DragStartInfo,
-    GameCellDragResult,
-    GameCellDragResultType,
-    DropInfo,
-} from "../game-cell-dnd";
-import { CellMode, CellPositionType } from "../../types";
+import { CellPositionType } from "../../types";
 import "./game-stand.scss";
-import { invariant } from "../../utils";
-import { GameStandCell } from "../game-stand-cell";
+import { GameCellConnected } from "../game-cell-connected";
 
 export interface GameStandProps {
     className?: string;
@@ -35,20 +26,14 @@ export class GameStand extends React.Component<GameStandProps> {
         return classnames("GameStand", this.props.className);
     }
 
-    @action.bound private handleDrop({ targetPosition, sourcePosition }: DropInfo): boolean {
-        this.game.moveCell(sourcePosition, targetPosition);
-        return true;
-    }
-
     @computed private get cells(): JSX.Element[] {
         const result: JSX.Element[] = [];
         for (let index = 0; index < (this.stand?.maxIndex ?? 0); ++index) {
             result.push(
-                <GameStandCell
+                <GameCellConnected
                     key={index}
                     className="GameStand__cell"
                     position={{ positionType: CellPositionType.STAND, index, playerId: this.props.playerId }}
-                    onDrop={this.handleDrop}
                 />,
             );
         }

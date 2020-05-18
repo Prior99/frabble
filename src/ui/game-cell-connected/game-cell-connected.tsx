@@ -9,18 +9,18 @@ import {
     GameCellDndMode,
     DropInfo,
 } from "../game-cell-dnd";
-import { CellMode, CellPositionStand, Letter } from "../../types";
-import "./game-stand-cell.scss";
+import { CellMode, Letter, CellPosition, CellPositionType } from "../../types";
+import "./game-cell-connected.scss";
+import { invariant } from "../../utils";
 
-export interface GameStandCellProps {
+export interface GameCellConnectedProps {
     className?: string;
-    position: CellPositionStand;
-    onDrop: (info: DropInfo) => boolean;
+    position: CellPosition;
 }
 
 @external
 @observer
-export class GameStandCell extends React.Component<GameStandCellProps> {
+export class GameCellConnected extends React.Component<GameCellConnectedProps> {
     @inject private game!: Game;
 
     @observable private dragging = false;
@@ -31,9 +31,14 @@ export class GameStandCell extends React.Component<GameStandCellProps> {
 
     @computed private get classNames() {
         return classnames({
-            "GameStandCell": true,
-            "GameStandCell--dragging": this.dragging,
+            "GameCellConnected": true,
+            "GameCellConnected--dragging": this.dragging,
         }, this.props.className);
+    }
+
+    @action.bound private handleDrop({ targetPosition, sourcePosition }: DropInfo): boolean {
+        this.game.moveCell(sourcePosition, targetPosition);
+        return true;
     }
 
     @action.bound private handleDragStart() {
@@ -44,20 +49,31 @@ export class GameStandCell extends React.Component<GameStandCellProps> {
         this.dragging = false;
     }
 
+    @computed private get cellMode(): CellMode {
+        const { position } = this.props;
+        switch (position.positionType) {
+            case CellPositionType.BOARD:
+                return this.game.board.cellModeAt(position.position);
+            case CellPositionType.STAND:
+                return CellMode.STANDARD;
+            default: invariant(position);
+        }
+    }
+
     public render(): JSX.Element {
         if (this.letter === undefined) {
             return <GameCellDnd
-                cellMode={CellMode.STANDARD}
+                cellMode={this.cellMode}
                 className={this.classNames}
                 dragMode={GameCellDndMode.TARGET}
-                onDrop={this.props.onDrop}
+                onDrop={this.handleDrop}
                 position={this.props.position}
             />
         }
         return (
             <GameCellDnd
                 letter={this.letter}
-                cellMode={CellMode.STANDARD}
+                cellMode={this.cellMode}
                 className={this.classNames}
                 dragMode={GameCellDndMode.SOURCE}
                 onDragStart={this.handleDragStart}

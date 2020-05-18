@@ -1,12 +1,12 @@
 import * as React from "react";
-import { GameCellDnd, GameCellDndMode, DropInfo } from "../game-cell-dnd";
-import { computed, action } from "mobx";
+import { computed } from "mobx";
 import { observer } from "mobx-react";
 import classNames from "classnames";
 import "./game-board.scss";
 import { CellPositionType } from "../../types";
 import { external, inject } from "tsdi";
 import { Game } from "../../game";
+import { GameCellConnected } from "../game-cell-connected";
 
 export interface GameBoardProps {
     className?: string;
@@ -21,22 +21,13 @@ export class GameBoard extends React.Component<GameBoardProps> {
         return this.game.board;
     }
 
-    @action.bound private onPlaceLetter({ targetPosition, sourcePosition }: DropInfo): boolean {
-        this.game.moveCell(sourcePosition, targetPosition);
-        return true;
-    }
-
     @computed private get cells(): JSX.Element[] {
         const result: JSX.Element[] = [];
-        for (const { cell, mode, position } of this.board.iterator()) {
+        for (const { position } of this.board.iterator()) {
             result.push(
-                <GameCellDnd
+                <GameCellConnected
                     key={`${position.x}-${position.y}`}
                     className="GameBoard__cell"
-                    cellMode={mode}
-                    letter={!cell.empty ? cell.letter : undefined}
-                    dragMode={GameCellDndMode.TARGET}
-                    onDrop={this.onPlaceLetter}
                     position={{ positionType: CellPositionType.BOARD, position }}
                 />,
             );
