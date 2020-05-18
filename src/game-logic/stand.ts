@@ -48,6 +48,6 @@ export class Stand {
     }
 
     @computed public get maxIndex(): number {
-        return Math.max(...Array.from(this.letters.keys()), Stand.MAX_LETTERS, Stand.EMPTY);
+        return Math.max(...Array.from(this.letters.keys()), Stand.MAX_LETTERS + Stand.EMPTY);
     }
 }
