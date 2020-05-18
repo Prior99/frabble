@@ -2,9 +2,11 @@
 .GameStand {
     display: flex;
     justify-content: center;
+    height: 100%;
+    width: 100%;
 
     &__cell {
-        $size: 7vw;
+        $size: 7vh;
         width: $size;
         height: $size;
     }

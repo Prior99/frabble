@@ -4,11 +4,7 @@ import { external, inject } from "tsdi";
 import { Game } from "../../game";
 import { computed, action, observable } from "mobx";
 import classnames from "classnames";
-import {
-    GameCellDnd,
-    GameCellDndMode,
-    DropInfo,
-} from "../game-cell-dnd";
+import { GameCellDnd, GameCellDndMode, DropInfo } from "../game-cell-dnd";
 import { CellMode, Letter, CellPosition, CellPositionType } from "../../types";
 import "./game-cell-connected.scss";
 import { invariant } from "../../utils";
@@ -25,15 +21,33 @@ export class GameCellConnected extends React.Component<GameCellConnectedProps> {
 
     @observable private dragging = false;
 
+    @computed private get permanent(): boolean {
+        if (this.props.position.positionType !== CellPositionType.BOARD) {
+            return false;
+        }
+        if (this.letter === undefined) {
+            return false;
+        }
+        return this.game.turn !== this.turn;
+    }
+
     @computed private get letter(): Letter | undefined {
         return this.game.getLetter(this.props.position);
     }
 
+    @computed private get turn(): number | undefined {
+        return this.game.getCellTurn(this.props.position);
+    }
+
     @computed private get classNames() {
-        return classnames({
-            "GameCellConnected": true,
-            "GameCellConnected--dragging": this.dragging,
-        }, this.props.className);
+        return classnames(
+            {
+                GameCellConnected: true,
+                "GameCellConnected--dragging": this.dragging,
+                "GameCellConnected--permanent": this.permanent,
+            },
+            this.props.className,
+        );
     }
 
     @action.bound private handleDrop({ targetPosition, sourcePosition }: DropInfo): boolean {
@@ -56,19 +70,45 @@ export class GameCellConnected extends React.Component<GameCellConnectedProps> {
                 return this.game.board.cellModeAt(position.position);
             case CellPositionType.STAND:
                 return CellMode.STAND;
-            default: invariant(position);
+            default:
+                invariant(position);
         }
     }
 
+    @computed private get immovable() {
+        if (this.permanent) {
+            return true;
+        }
+        if (this.props.position.positionType === CellPositionType.STAND) {
+            return false;
+        }
+        if (this.game.currentUserId !== this.game.users.ownUser.id) {
+            return true;
+        }
+        return false;
+    }
+
     public render(): JSX.Element {
+        if (this.immovable) {
+            return (
+                <GameCellDnd
+                    letter={this.letter}
+                    cellMode={this.cellMode}
+                    className={this.classNames}
+                    dragMode={GameCellDndMode.NONE}
+                />
+            );
+        }
         if (this.letter === undefined) {
-            return <GameCellDnd
-                cellMode={this.cellMode}
-                className={this.classNames}
-                dragMode={GameCellDndMode.TARGET}
-                onDrop={this.handleDrop}
-                position={this.props.position}
-            />
+            return (
+                <GameCellDnd
+                    cellMode={this.cellMode}
+                    className={this.classNames}
+                    dragMode={GameCellDndMode.TARGET}
+                    onDrop={this.handleDrop}
+                    position={this.props.position}
+                />
+            );
         }
         return (
             <GameCellDnd
@@ -83,4 +123,3 @@ export class GameCellConnected extends React.Component<GameCellConnectedProps> {
         );
     }
 }
-

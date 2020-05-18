@@ -1,5 +1,11 @@
+@import "../../variables.scss";
+
 .GameCellConnected {
     &--dragging {
         opacity: 0.5;
+    }
+
+    &--permanent {
+        background-color: color("primary", 2);
     }
 }

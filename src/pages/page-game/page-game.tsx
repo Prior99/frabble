@@ -2,17 +2,11 @@ import * as React from "react";
 import { addRoute, RouteProps } from "../../routing";
 import { external, inject } from "tsdi";
 import { observer } from "mobx-react";
-// import { DndProvider} from "react-dnd-multi-backend";
-// import HTML5ToTouch from "react-dnd-multi-backend/dist/esm/HTML5toTouch";
 import { LobbyMode, GameState } from "../../types";
 import "./page-game.scss";
 import { Game } from "../../game";
+import { Lobby, GameContainer } from "../../ui";
 import { invariant } from "../../utils";
-import { Lobby, GameBoard, GameStand } from "../../ui";
-import { DndProvider } from "react-dnd";
-import Backend from 'react-dnd-html5-backend'
-import { Button } from "semantic-ui-react";
-import { action } from "mobx";
 
 export interface PageGameProps {
     lobbyMode: LobbyMode;
@@ -32,22 +26,12 @@ export class PageGame extends React.Component<RouteProps<PageGameProps>> {
         }
     }
 
-    @action.bound private handleCommit() {
-        this.game.endTurn();
-    }
-
     public render(): JSX.Element {
         switch (this.game.state) {
             case GameState.LOBBY:
                 return <Lobby className="PageGame__lobby" />;
             case GameState.STARTED:
-                return (
-                    <DndProvider backend={Backend}>
-                        <GameBoard className="PageGame__board" />
-                        <GameStand playerId={this.game.users.ownUser.id} className="PageGame__stand"/>
-                        <Button content="Commit" onClick={this.handleCommit} />
-                    </DndProvider>
-                );
+                return <GameContainer className="PageGame__gameContainer" />;
             default:
                 invariant(this.game.state);
         }

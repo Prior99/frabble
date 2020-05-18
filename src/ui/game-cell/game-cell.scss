@@ -30,7 +30,7 @@ $cellDescription: (
     "stand": "",
 );
 
-$cellFontSize: (50 / 15) + vw;
+$cellFontSize: (30 / 15) + vw;
 
 .GameCell {
     border: 1px solid $white;
@@ -55,7 +55,7 @@ $cellFontSize: (50 / 15) + vw;
 
         & > .GameCell__letter {
             position: absolute;
-            font-size: calc(#{$cellFontSize} * 0.9);
+            font-size: calc(#{$cellFontSize} * 1.5);
         }
 
         & > .GameCell__points {

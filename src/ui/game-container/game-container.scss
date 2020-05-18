@@ -1,0 +1,69 @@
+@import "../../variables.scss";
+
+.GameContainer {
+    display: flex;
+    box-sizing: border-box;
+    padding: $gutter / 2;
+
+    &__mainArea {
+        flex-grow: 1;
+        flex-shrink: 0;
+        max-width: 85vh;
+
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    &__boardContainer {
+        padding: $gutter / 2 !important;
+        flex-grow: 1;
+        width: 100%;;
+    }
+
+    &__standContainer {
+        height: calc(7vh + #{$gutter});
+        padding: $gutter / 2 !important;
+        width: fit-content;
+    }
+
+    &__board {
+    }
+
+    &__commitButton {
+
+    }
+
+    &__sidebar {
+        flex-grow: 1;
+        flex-shrink: 1;
+        min-width: 150px;
+        box-sizing: border-box;
+        padding-left: $gutter;
+        padding-top: $gutter / 2;
+    }
+
+    @mixin container {
+        margin-bottom: $gutter;
+    }
+
+    &__statusContainer {
+        @include container;
+    }
+
+    &__scoreboardContainer {
+        @include container;
+    }
+
+    &__actions {
+        @include container;
+    }
+
+    &__scoreboard {
+    }
+
+    &__stand {
+        height: 10vh;
+    }
+}

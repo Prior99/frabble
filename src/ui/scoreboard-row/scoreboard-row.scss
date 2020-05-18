@@ -1,0 +1,11 @@
+@import "../../variables.scss";
+
+.ScoreboardRow {
+    &__rank {
+        width: 10px;
+    }
+
+    &__score {
+        font-weight: $bold;
+    }
+}

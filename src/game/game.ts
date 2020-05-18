@@ -1,7 +1,7 @@
 import { create as randomSeed, RandomSeed } from "random-seed";
 import { computed, action, observable } from "mobx";
 import { Peer, Host, Client } from "../networking";
-import { NetworkingMode, GameState, Language, RemoteUser, Letter, CellPosition, Cell, CellPositionType } from "../types";
+import { NetworkingMode, GameState, Language, RemoteUser, Letter, CellPosition, CellPositionType } from "../types";
 import { RemoteUsers } from "./remote-users";
 import { component } from "tsdi";
 import { GameConfig } from "../types";
@@ -9,8 +9,15 @@ import { v4 } from "uuid";
 import { Board } from "../game-logic";
 import { LetterBag } from "../game-logic/letter-bag";
 import { prop } from "ramda";
-import { shuffle, Vec2, invariant } from "../utils";
+import { shuffle, invariant } from "../utils";
 import { Stand } from "../game-logic/stand";
+
+export interface Score {
+    rank: number;
+    score: number;
+    playerName: string;
+    playerId: string;
+}
 
 @component
 export class Game {
@@ -27,6 +34,22 @@ export class Game {
     @observable public turn = 0;
     @observable public scores = new Map<string, number>();
     @observable public stands = new Map<string, Stand>();
+
+    @computed public get scoreList(): Score[] {
+        return Array.from(this.scores.entries())
+            .sort((a, b) => a[1] - b[1])
+            .map(([playerId, score]) => ({ playerId, playerName: this.users.getUser(playerId)?.name ?? "", score }))
+            .map(({ playerName, playerId, score }, index) => ({
+                rank: index + 1,
+                score,
+                playerName,
+                playerId,
+            }));
+    }
+
+    public getRank(playerId: string): number {
+        return this.scoreList.find(entry => entry.playerId === playerId)?.rank ?? 0;
+    }
 
     @computed public get networkMode() {
         if (!this.peer) {
@@ -71,6 +94,18 @@ export class Game {
 
     @action.bound private awardScore() {
         // TODO: Implement.
+    }
+
+    public getCellTurn(position: CellPosition): number | undefined {
+        switch (position.positionType) {
+            case CellPositionType.BOARD:
+                const cell = this.board.at(position.position);
+                if (cell.empty) { return; }
+                return cell.turn;
+            case CellPositionType.STAND:
+                return;
+            default: invariant(position);
+        }
     }
 
     public getLetter(position: CellPosition): Letter | undefined {
