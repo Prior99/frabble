@@ -7,7 +7,7 @@ import classnames from "classnames";
 import { GameCellDnd, GameCellDndMode, DropInfo } from "../game-cell-dnd";
 import { CellMode, Letter, CellPosition, CellPositionType } from "../../types";
 import "./game-cell-connected.scss";
-import { invariant } from "../../utils";
+import { invariant, cellPositionEquals } from "../../utils";
 
 export interface GameCellConnectedProps {
     className?: string;
@@ -31,6 +31,26 @@ export class GameCellConnected extends React.Component<GameCellConnectedProps> {
         return this.game.turn !== this.turn;
     }
 
+    @computed private get markedForExchange() {
+        return this.game.lettersToExchange?.some(exchange => cellPositionEquals(exchange, this.props.position));
+    }
+
+    @computed private get faded(): boolean {
+        if (this.dragging) {
+            return true;
+        }
+
+        if (this.props.position.positionType !== CellPositionType.STAND) {
+            return false;
+        }
+
+        if (this.game.isPassing && !this.markedForExchange) {
+            return true;
+        }
+
+        return false;
+    }
+
     @computed private get letter(): Letter | undefined {
         return this.game.getLetter(this.props.position);
     }
@@ -43,8 +63,9 @@ export class GameCellConnected extends React.Component<GameCellConnectedProps> {
         return classnames(
             {
                 GameCellConnected: true,
-                "GameCellConnected--dragging": this.dragging,
+                "GameCellConnected--faded": this.faded,
                 "GameCellConnected--permanent": this.permanent,
+                "GameCellConnected--passing": this.game.isPassing
             },
             this.props.className,
         );
@@ -61,6 +82,19 @@ export class GameCellConnected extends React.Component<GameCellConnectedProps> {
 
     @action.bound private handleDragStop() {
         this.dragging = false;
+    }
+
+    @action.bound private handleClick() {
+        if (this.props.position.positionType !== CellPositionType.STAND || !this.game.isPassing) {
+            return;
+        }
+
+        if (this.markedForExchange) {
+            this.game.unmarkLetterForExchange(this.props.position);
+            return;
+        }
+
+        this.game.markLetterForExchange(this.props.position);
     }
 
     @computed private get cellMode(): CellMode {
@@ -89,13 +123,14 @@ export class GameCellConnected extends React.Component<GameCellConnectedProps> {
     }
 
     public render(): JSX.Element {
-        if (this.immovable) {
+        if (this.immovable || this.game.isPassing) {
             return (
                 <GameCellDnd
                     letter={this.letter}
                     cellMode={this.cellMode}
                     className={this.classNames}
                     dragMode={GameCellDndMode.NONE}
+                    onClick={this.handleClick}
                 />
             );
         }

@@ -11,6 +11,7 @@ export interface BaseGameCellProps {
     letter?: Letter;
     cellMode: CellMode;
     className?: string;
+    onClick?: React.MouseEventHandler;
 }
 
 export interface GameCellProps extends BaseGameCellProps {
@@ -92,7 +93,7 @@ export class GameCell extends React.Component<GameCellProps> {
 
     public render(): JSX.Element {
         return (
-            <div ref={this.props.innerRef} className={this.classNames}>
+            <div ref={this.props.innerRef} onClick={this.props.onClick} className={this.classNames}>
                 <OneLetterSvg fontSize={90} content={String(this.points)} className="GameCell__points" />
                 <OneLetterSvg fontSize={80} y="55%" content={this.letter} className="GameCell__letter" />
                 <OneLetterSvg fontSize={50} content={this.cellDescription} className="GameCell__description" />

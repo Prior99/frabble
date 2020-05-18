@@ -13,6 +13,7 @@ import {
     CellMoveInfo,
     CellPosition,
     Letter,
+    CellPositionStand,
 } from "../types";
 import { observable } from "mobx";
 import { Vec2, vec2, invariant, serializeCellPosition, deserializeCellPosition } from "../utils";
@@ -33,7 +34,7 @@ export abstract class Peer extends EventEmitter {
     public onUserDisconnected = this.registerEvent<(userId: string) => void>();
     public onGameStart = this.registerEvent<(config: GameConfig) => void>();
     public onCellMove = this.registerEvent<(sourcePosition: CellPosition, targetPosition: CellPosition) => void>();
-    public onPass = this.registerEvent<(indices: number[]) => void>();
+    public onPass = this.registerEvent<(letterPositions: CellPositionStand[]) => void>();
     public onEndTurn = this.registerEvent<() => void>();
 
     protected abstract sendClientMessage(message: ClientMessage): void;
@@ -59,7 +60,7 @@ export abstract class Peer extends EventEmitter {
                             deserializeCellPosition(clientMessage.targetPosition),
                         );
                     case ClientMessageType.PASS:
-                        return this.emit(this.onPass, clientMessage.exchangedLetterIndices);
+                        return this.emit(this.onPass, clientMessage.exchangedLetters.map(deserializeCellPosition));
                     case ClientMessageType.END_TURN:
                         return this.emit(this.onEndTurn);
                     case ClientMessageType.HELLO:
@@ -110,10 +111,10 @@ export abstract class Peer extends EventEmitter {
         });
     }
 
-    @bind public sendPass(exchangedLetterIndices: number[]): void {
+    @bind public sendPass(exchangedLetters: CellPosition[]): void {
         this.sendClientMessage({
             message: ClientMessageType.PASS,
-            exchangedLetterIndices,
+            exchangedLetters: exchangedLetters.map(serializeCellPosition),
         });
     }
 

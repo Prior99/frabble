@@ -1,7 +1,7 @@
 import { create as randomSeed, RandomSeed } from "random-seed";
 import { computed, action, observable } from "mobx";
 import { Peer, Host, Client } from "../networking";
-import { NetworkingMode, GameState, Language, RemoteUser, Letter, CellPosition, CellPositionType } from "../types";
+import { NetworkingMode, GameState, Language, RemoteUser, Letter, CellPosition, CellPositionType, CellPositionStand } from "../types";
 import { RemoteUsers } from "./remote-users";
 import { component } from "tsdi";
 import { GameConfig } from "../types";
@@ -9,7 +9,7 @@ import { v4 } from "uuid";
 import { Board, ValidityResult } from "../game-logic";
 import { LetterBag } from "../game-logic/letter-bag";
 import { prop } from "ramda";
-import { shuffle, invariant } from "../utils";
+import { shuffle, invariant, cellPositionEquals } from "../utils";
 import { Stand } from "../game-logic/stand";
 
 export interface Score {
@@ -34,6 +34,8 @@ export class Game {
     @observable public turn = 0;
     @observable public scores = new Map<string, number>();
     @observable public stands = new Map<string, Stand>();
+
+    @observable public lettersToExchange: CellPositionStand[] | undefined;
 
     @computed public get scoreList(): Score[] {
         return Array.from(this.scores.entries())
@@ -107,6 +109,51 @@ export class Game {
         return score;
     }
 
+    @computed public get canPass(): boolean {
+        return this.board.getLettersForTurn(this.turn).length === 0;
+    }
+
+    @action.bound public startPassing() {
+        this.lettersToExchange = [];
+    }
+
+    @action.bound public confirmPassing() {
+        if (this.lettersToExchange === undefined) {
+            throw new Error("Must start passing before committing.");
+        }
+
+        this.peer?.sendPass(this.lettersToExchange);
+        this.lettersToExchange = undefined;
+    }
+
+    @action.bound public abortPassing() {
+        this.lettersToExchange = undefined;
+    }
+
+    @action.bound public markLetterForExchange(letterCell: CellPositionStand) {
+        if (this.lettersToExchange === undefined) {
+            throw new Error("Must start passing before marking a letter.");
+        }
+
+        if (this.lettersToExchange.some(exchange => cellPositionEquals(exchange, letterCell))) {
+            throw new Error("Letter already marked.");
+        }
+
+        this.lettersToExchange.push(letterCell);
+    }
+
+    @action.bound public unmarkLetterForExchange(letterCell: CellPositionStand) {
+        if (this.lettersToExchange === undefined) {
+            throw new Error("Must start passing before unmarking a letter.");
+        }
+
+        this.lettersToExchange = this.lettersToExchange.filter(exchange => !cellPositionEquals(exchange, letterCell));
+    }
+
+    @computed public get isPassing(): boolean {
+        return this.lettersToExchange !== undefined;
+    }
+
     @computed public get currentTurnValid(): ValidityResult {
         return this.board.isTurnValid(this.turn);
     }
@@ -150,7 +197,7 @@ export class Game {
             case CellPositionType.STAND:
                 const stand = this.stands.get(position.playerId);
                 if (!stand) {
-                    throw new Error(`Couldn't find stand for player ${position.playerId}`);
+                    throw new Error(`Couldn't find stand for player ${position.playerId}.`);
                 }
                 return stand.at(position.index);
             default:
@@ -208,7 +255,7 @@ export class Game {
                     case CellPositionType.STAND:
                         const stand = this.stands.get(sourcePosition.playerId);
                         if (!stand) {
-                            throw new Error(`Couldn't find stand for player ${sourcePosition.playerId}`);
+                            throw new Error(`Couldn't find stand for player ${sourcePosition.playerId}.`);
                         }
                         stand.remove(sourcePosition.index);
                         break;
@@ -222,7 +269,7 @@ export class Game {
                     case CellPositionType.STAND:
                         const stand = this.stands.get(targetPosition.playerId);
                         if (!stand) {
-                            throw new Error(`Couldn't find stand for player ${targetPosition.playerId}`);
+                            throw new Error(`Couldn't find stand for player ${targetPosition.playerId}.`);
                         }
                         stand.set(targetPosition.index, letter);
                         break;
@@ -237,6 +284,7 @@ export class Game {
         this.peer.onEndTurn(
             action(() => {
                 this.awardScore();
+                this.abortPassing();
                 const newLetters = this.letterBag.takeMany(this.currentStand.missingLetterCount);
                 this.currentStand.add(...newLetters);
 
@@ -244,11 +292,21 @@ export class Game {
             }),
         );
         this.peer.onPass(
-            action((exchangedLetterIndices: number[]) => {
-                const removedLetters = this.currentStand.remove(...exchangedLetterIndices);
-                const newLetters = this.letterBag.exchange(...removedLetters);
+            action((exchangedLetterCells: CellPositionStand[]) => {
+                exchangedLetterCells.forEach(exchange => {
+                    const stand = this.stands.get(exchange.playerId);
 
-                this.currentStand.add(...newLetters);
+                    if (!stand) {
+                        throw new Error(`Inconsistency: User ${exchange.playerId} unknown.`);
+                    }
+
+                    const removedLetters = stand.remove(exchange.index);
+                    const [ newLetter ] = this.letterBag.exchange(...removedLetters);
+
+                    stand.set(exchange.index, newLetter);
+                });
+
+                this.turn++;
             }),
         );
 

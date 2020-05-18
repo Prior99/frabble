@@ -21,7 +21,7 @@ export interface ClientMessageHello {
 
 export interface ClientMessagePass {
     message: ClientMessageType.PASS;
-    exchangedLetterIndices: number[];
+    exchangedLetters: SerializedCellPosition[];
 }
 
 export interface ClientMessageCellMove {

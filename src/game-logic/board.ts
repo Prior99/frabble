@@ -1,6 +1,6 @@
 import { Cell, CellMode, Letter, CellFilled } from "../types";
 import { Vec2, vec2, rect, RectIteratorOrder } from "../utils";
-import { observable, action } from "mobx";
+import { observable, action, computed } from "mobx";
 import { uniq, symmetricDifferenceWith } from "ramda";
 import { getPointsForLetter } from "./letters";
 import { Stand } from "./stand";
@@ -90,7 +90,7 @@ export class Board {
         return this.cells[this.rect.toIndex(pos)];
     }
 
-    public isEmpty(pos: Vec2): boolean {
+    public isEmptyAt(pos: Vec2): boolean {
         return this.at(pos).empty;
     }
 
@@ -140,6 +140,25 @@ export class Board {
         return CellMode.STANDARD;
     }
 
+
+    @computed public get isEmpty(): boolean {
+        for (const cell of this.iterator()) {
+            if (!cell.cell.empty) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public wasEmptyBeforeTurn(turn: number): boolean {
+        for (const cell of this.iterator()) {
+            if (!cell.cell.empty && cell.cell.turn < turn) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public getLettersForTurn(turn: number): PlacedLetter[] {
         const result: PlacedLetter[] = [];
         for (const position of this.positionIterator()) {
@@ -176,7 +195,7 @@ export class Board {
         if (placedLetters.length === 0) {
             return { valid: false, reason: "You must place at least one letter." };
         }
-        if (turn === 0 && !placedLetters.some(({ position }) => position.equals(vec2(0, 0)))) {
+        if (this.wasEmptyBeforeTurn(turn) && !placedLetters.some(({ position }) => position.equals(vec2(0, 0)))) {
             return { valid: false, reason: "The first word must be placed across the center of the board." };
         }
 
@@ -189,7 +208,7 @@ export class Board {
         const placedIntoVoid = !placedLetters.some(({ position }) => {
             return this.getAdjacentFilledCells(position).some((cell) => cell.turn < turn);
         });
-        if (turn > 0 && placedIntoVoid) {
+        if (!this.wasEmptyBeforeTurn(turn) && placedIntoVoid) {
             return { valid: false, reason: "Must place adjacent to existing word." };
         }
 
@@ -209,6 +228,9 @@ export class Board {
         const result: Word = { positions: [], multiplier: 1 };
         for (const direction of [axis, axis.mult(-1)]) {
             for (let iter = position; ; iter = iter.add(direction)) {
+                if (!this.rect.contains(iter)) {
+                    break;
+                }
                 if (result.positions.some(existingPosition => existingPosition.equals(iter))) {
                     continue;
                 }

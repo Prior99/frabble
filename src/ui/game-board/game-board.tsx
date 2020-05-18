@@ -36,7 +36,9 @@ export class GameBoard extends React.Component<GameBoardProps> {
     }
 
     @computed private get classNames(): string {
-        return classNames("GameBoard", this.props.className);
+        return classNames("GameBoard", this.props.className, {
+            "GameBoard--passing": this.game.isPassing
+        });
     }
 
     public render() {

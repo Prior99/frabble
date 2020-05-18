@@ -25,7 +25,7 @@ export class Status extends React.Component<StatusProps> {
                 <Table.Body>
                     <Table.Row>
                         <Table.Cell>Turn</Table.Cell>
-                        <Table.Cell>{this.game.turn}</Table.Cell>
+                        <Table.Cell>{this.game.turn + 1}</Table.Cell>
                     </Table.Row>
                     <Table.Row>
                         <Table.Cell>Letters</Table.Cell>

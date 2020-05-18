@@ -1,4 +1,4 @@
-import { CellPosition, CellPositionType } from "../types";
+import { CellPosition, CellPositionType, CellPositionStand, CellPositionBoard } from "../types";
 import { invariant } from "./invariant";
 import { vec2 } from "./vec2";
 
@@ -42,5 +42,21 @@ export function deserializeCellPosition(position: SerializedCellPosition): CellP
                 playerId: position.playerId,
             };
         default: invariant(position);
+    }
+}
+
+export function cellPositionEquals(a: CellPosition, b: CellPosition): boolean {
+    if (a.positionType !== b.positionType) {
+        return false;
+    }
+    
+    switch(a.positionType) {
+        case CellPositionType.STAND:
+            const bStand = b as CellPositionStand;
+            return a.index === bStand.index && a.playerId === bStand.playerId;
+        case CellPositionType.BOARD: 
+            const bBoard = b as CellPositionBoard;
+            return a.position.equals(bBoard.position);
+        default: invariant(a);
     }
 }

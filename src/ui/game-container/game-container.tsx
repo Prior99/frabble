@@ -8,7 +8,7 @@ import "./game-container.scss";
 import { Game } from "../../game";
 import { invariant } from "../../utils";
 import { Lobby, GameBoard, GameStand } from "../../ui";
-import { Button, Segment, Popup } from "semantic-ui-react";
+import { Button, Segment, Popup, Form } from "semantic-ui-react";
 import { action, computed } from "mobx";
 import { Scoreboard } from "../scoreboard/scoreboard";
 import { Status } from "../status";
@@ -26,8 +26,28 @@ export class GameContainer extends React.Component<GameContainerProps> {
         this.game.endTurn();
     }
 
+    @action.bound private startPassing() {
+        this.game.startPassing();
+    }
+
+    @action.bound private confirmPassing() {
+        this.game.confirmPassing();
+    }
+
+    @action.bound private abortPassing() {
+        this.game.abortPassing();
+    }
+
     @computed private get canEndTurn(): boolean {
         return this.game.users.ownUser.id === this.game.currentUserId && this.game.canEndTurn;
+    }
+
+    @computed private get canPass(): boolean {
+        return this.game.users.ownUser.id === this.game.currentUserId && this.game.canPass;
+    }
+
+    @computed private get isPassing(): boolean {
+        return this.game.isPassing;
     }
 
     @computed private get buttonPopupContent(): string {
@@ -46,9 +66,21 @@ export class GameContainer extends React.Component<GameContainerProps> {
                                 <Segment className="GameContainer__boardContainer">
                                     <GameBoard className="GameContainer__board" />
                                 </Segment>
-                                <Segment className="GameContainer__standContainer">
-                                    <GameStand playerId={this.game.users.ownUser.id} className="GameContainer__stand" />
-                                </Segment>
+
+                                <Popup
+                                    header="Passing"
+                                    content="Select the letters to exchange or just click confirm."
+                                    open={this.isPassing}
+                                    inverted
+                                    trigger={
+                                        <Segment className="GameContainer__standContainer">
+                                            <GameStand
+                                                playerId={this.game.users.ownUser.id}
+                                                className="GameContainer__stand"
+                                            />
+                                        </Segment>
+                                    }
+                                />
                             </div>
                             <div className="GameContainer__sidebar">
                                 <div className="GameContainer__statusContainer">
@@ -61,26 +93,46 @@ export class GameContainer extends React.Component<GameContainerProps> {
                                 </div>
                                 <div className="GameContainer__actions">
                                     <h2>Actions</h2>
-                                    <Popup
-                                        header="Cannot end turn"
-                                        content={this.buttonPopupContent}
-                                        disabled={this.canEndTurn}
-                                        inverted
-                                        trigger={
-                                            <div>
-                                                <Button
-                                                    disabled={!this.canEndTurn}
-                                                    icon="play"
-                                                    labelPosition="left"
-                                                    primary
-                                                    size="big"
-                                                    content="End turn"
-                                                    onClick={this.handleCommit}
-                                                    className="GameContainer__commitButton"
-                                                />
-                                            </div>
-                                        }
-                                    />
+                                    <Form.Group inline>
+                                        <Popup
+                                            header="Cannot end turn"
+                                            content={this.buttonPopupContent}
+                                            disabled={this.canEndTurn}
+                                            inverted
+                                            trigger={
+                                                <span>
+                                                    <Button
+                                                        disabled={!this.canEndTurn}
+                                                        icon="play"
+                                                        labelPosition="left"
+                                                        primary
+                                                        size="big"
+                                                        content="End turn"
+                                                        onClick={this.handleCommit}
+                                                        className="GameContainer__commitButton"
+                                                    />
+                                                </span>
+                                            }
+                                        />
+                                        {this.isPassing ? (
+                                            <Button.Group size="big">
+                                                <Button content="Confirm" icon="check" labelPosition="left" positive onClick={this.confirmPassing} />
+                                                <Button.Or />
+                                                <Button content="Abort" icon="cancel" labelPosition="right" negative onClick={this.abortPassing} />
+                                            </Button.Group>
+                                        ) : (
+                                            <Button
+                                                disabled={!this.canPass}
+                                                icon="play"
+                                                labelPosition="left"
+                                                primary
+                                                size="big"
+                                                content="Pass"
+                                                onClick={this.startPassing}
+                                                className="GameContainer__commitButton"
+                                            />
+                                        )}
+                                    </Form.Group>
                                 </div>
                             </div>
                         </div>

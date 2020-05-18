@@ -24,4 +24,8 @@
         height: percentage(1 / $boardSize);
         width: percentage(1 / $boardSize);
     }
+
+    &--passing {
+        opacity: 50%;
+    }
 }
