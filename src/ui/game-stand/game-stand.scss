@@ -1,4 +1,3 @@
-
 .GameStand {
     display: flex;
     justify-content: center;
@@ -6,8 +5,15 @@
     width: 100%;
 
     &__cell {
-        $size: 7vh;
-        width: $size;
-        height: $size;
+        @media (orientation: landscape) {
+            $size: 7vh;
+            width: $size;
+            height: $size;
+        }
+        @media (orientation: portrait) {
+            $size: 8vw;
+            width: $size;
+            height: $size;
+        }
     }
 }

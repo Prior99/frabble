@@ -20,16 +20,6 @@ $cellColors: (
     "stand": lighten(color("primary", 1), 10%),
 );
 
-$cellDescription: (
-    "standard": "",
-    "letterDouble": "2L",
-    "letterTriple": "3L",
-    "wordDouble": "2W",
-    "wordTriple": "3W",
-    "root": "🟆",
-    "stand": "",
-);
-
 $cellFontSize: (30 / 15) + vw;
 
 .GameCell {
@@ -44,33 +34,63 @@ $cellFontSize: (30 / 15) + vw;
 
     user-select: none;
 
+    position: relative;
+
+    @mixin textColor($color) {
+        > text {
+            fill: $color;
+            font-family: "Lato";
+        }
+    }
+
+    &__description,
+    &__letter,
+    &__points {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+    }
+
     &--content {
-        background-color: color("primary", 1);
+        $color: color("primary", 4);
+        $backgroundColor: lighten(color("primary", 1), 8%);
+
+        background-color: $backgroundColor;
         border-radius: 2px;
         border-color: lighten(color("primary", 1), 10%);
-        color: color("primary", 4);
         position: relative;
         display: flex;
         justify-content: center;
 
         & > .GameCell__letter {
-            position: absolute;
-            font-size: calc(#{$cellFontSize} * 1.5);
+            @include textColor($color);
+            $size: 85%;
+
+            top: 4px;
+            left: 0;
+            width: $size;
+            height: $size;
         }
 
         & > .GameCell__points {
-            position: absolute;
-            color: lighten(color("primary", 4), 5%);
+            @include textColor($color);
+            $size: 25%;
+            $margin: 3px;
+
             font-size: calc(#{$cellFontSize} * 0.5);
-            bottom: 2px;
-            line-height: 1;
-            text-align: right;
-            right: 2px;
+            bottom: $margin;
+            right: $margin;
+            width: $size;
+            height: $size;
+        }
+
+        & > .GameCell__description {
+            display: none;
         }
     }
 
     &--empty {
-        & > .GameCell__points {
+        & > .GameCell__points, & > .GameCell__letter {
             display: none;
         }
 
@@ -81,9 +101,8 @@ $cellFontSize: (30 / 15) + vw;
                 background-color: lighten($color, 10%);
                 border-color: lighten($color, 20%);
 
-                &::after {
-                    content: map-get($cellDescription, $modeName);
-                    color: $white;
+                & > .GameCell__description {
+                    @include textColor($white);
                 }
             }
 

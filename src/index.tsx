@@ -6,6 +6,7 @@ import "semantic-ui-css-offline/semantic.min.css";
 import "./factories";
 import { getRoutes } from "./routing";
 import { routeMainMenu } from "./pages";
+import "./main.scss";
 
 // Start dependency injection.
 const tsdi = new TSDI();

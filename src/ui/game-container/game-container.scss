@@ -5,34 +5,47 @@
     box-sizing: border-box;
     padding: $gutter / 2;
 
+    @media (orientation: landscape) {
+        flex-direction: row;
+    }
+    @media (orientation: portrait) {
+        flex-direction: column;
+    }
+
     &__mainArea {
+        @media (orientation: landscape) {
+            max-width: 85vh;
+        }
+        @media (orientation: portrait) {
+            width: 100%;
+        }
+
         flex-grow: 1;
         flex-shrink: 0;
-        max-width: 85vh;
 
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         align-items: center;
+
+        box-sizing: border-box;
     }
 
     &__boardContainer {
         padding: $gutter / 2 !important;
         flex-grow: 1;
-        width: 100%;;
+        width: 100%;
     }
 
     &__standContainer {
-        height: calc(7vh + #{$gutter});
         padding: $gutter / 2 !important;
-        width: fit-content;
+        margin: 0 !important;
     }
 
     &__board {
     }
 
     &__commitButton {
-
     }
 
     &__sidebar {
@@ -40,8 +53,17 @@
         flex-shrink: 1;
         min-width: 150px;
         box-sizing: border-box;
-        padding-left: $gutter;
-        padding-top: $gutter / 2;
+        display: flex;
+        flex-direction: column;
+
+        @media (orientation: landscape) {
+            padding-left: $gutter;
+        }
+
+        @media (orientation: portrait) {
+            margin-top: $gutter;
+            padding: $gutter / 2;
+        }
     }
 
     @mixin container {
@@ -50,20 +72,43 @@
 
     &__statusContainer {
         @include container;
+
+        @media (orientation: landscape) {
+            order: 1;
+        }
+
+        @media (orientation: portrait) {
+            order: 3;
+        }
     }
 
     &__scoreboardContainer {
         @include container;
+
+        @media (orientation: landscape) {
+            order: 2;
+        }
+
+        @media (orientation: portrait) {
+            order: 2;
+        }
     }
 
     &__actions {
         @include container;
+
+        @media (orientation: landscape) {
+            order: 3;
+        }
+
+        @media (orientation: portrait) {
+            order: 1;
+        }
     }
 
     &__scoreboard {
     }
 
     &__stand {
-        height: 10vh;
     }
 }
