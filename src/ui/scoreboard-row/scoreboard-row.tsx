@@ -36,6 +36,18 @@ export class ScoreboardRow extends React.Component<ScoreboardRowProps> {
         return this.game.currentUserId === this.props.playerId ? "blue" : undefined;
     }
 
+    @computed private get scoreGain(): number {
+        return this.game.currentTurnScore ?? 0;
+    }
+
+    @computed private get showScoreGain(): boolean {
+        return (
+            this.game.currentUserId === this.props.playerId &&
+            this.game.currentTurnScore !== undefined &&
+            this.game.currentTurnValid.valid
+        );
+    }
+
     public render(): JSX.Element {
         return (
             <Table.Row>
@@ -51,6 +63,7 @@ export class ScoreboardRow extends React.Component<ScoreboardRowProps> {
                 <Table.Cell>{this.playerName}</Table.Cell>
                 <Table.Cell textAlign="right" className="ScoreboardRow__score">
                     {this.score}
+                    {this.showScoreGain ? <span className="ScoreboardRow__scoreGain">+{this.scoreGain}</span> : <></>}
                 </Table.Cell>
             </Table.Row>
         );

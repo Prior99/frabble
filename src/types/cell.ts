@@ -1,14 +1,18 @@
 import { Letter } from "./letter";
 import { Vec2 } from "../utils";
 
-export type Cell = {
+export interface CellEmpty {
     empty: true;
-} | {
+}
+
+export interface CellFilled {
     empty: false;
     playerId: string;
     letter: Letter;
     turn: number;
 }
+
+export type Cell = CellEmpty | CellFilled;
 
 export const enum CellPositionType {
     STAND = "stand",

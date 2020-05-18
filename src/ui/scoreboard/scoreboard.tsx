@@ -37,7 +37,7 @@ export class Scoreboard extends React.Component<ScoreboardProps> {
                 </Table.Header>
                 <Table.Body>
                     {this.game.scoreList.map(({ playerId }) => (
-                        <ScoreboardRow playerId={playerId} />
+                        <ScoreboardRow key={playerId} playerId={playerId} />
                     ))}
                 </Table.Body>
             </Table>

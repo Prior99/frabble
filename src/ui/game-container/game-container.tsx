@@ -8,8 +8,8 @@ import "./game-container.scss";
 import { Game } from "../../game";
 import { invariant } from "../../utils";
 import { Lobby, GameBoard, GameStand } from "../../ui";
-import { Button, Segment } from "semantic-ui-react";
-import { action } from "mobx";
+import { Button, Segment, Popup } from "semantic-ui-react";
+import { action, computed } from "mobx";
 import { Scoreboard } from "../scoreboard/scoreboard";
 import { Status } from "../status";
 
@@ -24,6 +24,14 @@ export class GameContainer extends React.Component<GameContainerProps> {
 
     @action.bound private handleCommit() {
         this.game.endTurn();
+    }
+
+    @computed private get canEndTurn(): boolean {
+        return this.game.users.ownUser.id === this.game.currentUserId && this.game.canEndTurn;
+    }
+
+    @computed private get buttonPopupContent(): string {
+        return this.game.endTurnMessage;
     }
 
     public render(): JSX.Element {
@@ -53,15 +61,25 @@ export class GameContainer extends React.Component<GameContainerProps> {
                                 </div>
                                 <div className="GameContainer__actions">
                                     <h2>Actions</h2>
-                                    <Button
-                                        disabled={this.game.users.ownUser.id !== this.game.currentUserId}
-                                        icon="play"
-                                        labelPosition="left"
-                                        primary
-                                        size="big"
-                                        content="End turn"
-                                        onClick={this.handleCommit}
-                                        className="GameContainer__commitButton"
+                                    <Popup
+                                        header="Cannot end turn"
+                                        content={this.buttonPopupContent}
+                                        disabled={this.canEndTurn}
+                                        inverted
+                                        trigger={
+                                            <div>
+                                                <Button
+                                                    disabled={!this.canEndTurn}
+                                                    icon="play"
+                                                    labelPosition="left"
+                                                    primary
+                                                    size="big"
+                                                    content="End turn"
+                                                    onClick={this.handleCommit}
+                                                    className="GameContainer__commitButton"
+                                                />
+                                            </div>
+                                        }
                                     />
                                 </div>
                             </div>
