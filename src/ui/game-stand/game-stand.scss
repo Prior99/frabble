@@ -6,12 +6,12 @@
 
     &__cell {
         @media (orientation: landscape) {
-            $size: 7vh;
+            $size: 5vh;
             width: $size;
             height: $size;
         }
         @media (orientation: portrait) {
-            $size: 8vw;
+            $size: 6vw;
             width: $size;
             height: $size;
         }

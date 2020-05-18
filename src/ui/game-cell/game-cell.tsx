@@ -12,6 +12,7 @@ export interface BaseGameCellProps {
     cellMode: CellMode;
     className?: string;
     onClick?: React.MouseEventHandler;
+    hovered?: boolean;
 }
 
 export interface GameCellProps extends BaseGameCellProps {
@@ -22,7 +23,7 @@ function OneLetterSvg({
     content,
     className,
     fontSize = 100,
-    y = "50%"
+    y = "50%",
 }: {
     y?: string;
     fontSize?: number;
@@ -51,6 +52,7 @@ export class GameCell extends React.Component<GameCellProps> {
                 GameCell: true,
                 "GameCell--empty": this.empty,
                 "GameCell--content": !this.empty,
+                "GameCell--hovering": this.props.hovered,
             },
             `GameCell--${cellMode}`,
             this.props.className,

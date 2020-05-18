@@ -93,7 +93,6 @@ export class GameContainer extends React.Component<GameContainerProps> {
                                 </div>
                                 <div className="GameContainer__actions">
                                     <h2>Actions</h2>
-                                    <Form.Group inline>
                                         <Popup
                                             header="Cannot end turn"
                                             content={this.buttonPopupContent}
@@ -102,6 +101,7 @@ export class GameContainer extends React.Component<GameContainerProps> {
                                             trigger={
                                                 <span>
                                                     <Button
+                                            fluid
                                                         disabled={!this.canEndTurn}
                                                         icon="play"
                                                         labelPosition="left"
@@ -114,14 +114,16 @@ export class GameContainer extends React.Component<GameContainerProps> {
                                                 </span>
                                             }
                                         />
+                                        <p />
                                         {this.isPassing ? (
-                                            <Button.Group size="big">
+                                            <Button.Group fluid size="big">
                                                 <Button content="Confirm" icon="check" labelPosition="left" positive onClick={this.confirmPassing} />
                                                 <Button.Or />
                                                 <Button content="Abort" icon="cancel" labelPosition="right" negative onClick={this.abortPassing} />
                                             </Button.Group>
                                         ) : (
                                             <Button
+                                            fluid
                                                 disabled={!this.canPass}
                                                 icon="play"
                                                 labelPosition="left"
@@ -132,7 +134,6 @@ export class GameContainer extends React.Component<GameContainerProps> {
                                                 className="GameContainer__commitButton"
                                             />
                                         )}
-                                    </Form.Group>
                                 </div>
                             </div>
                         </div>

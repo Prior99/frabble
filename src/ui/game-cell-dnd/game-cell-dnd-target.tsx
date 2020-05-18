@@ -20,7 +20,7 @@ export function GameCellDndTarget({
     position: targetPosition,
     ...gameCellProps
 }: GameCellDndTargetProps): JSX.Element {
-    const [_, dropRef] = useDrop<DragItem, DropResult, {}>({
+    const [{ hovered }, dropRef] = useDrop<DragItem, DropResult, { hovered: boolean}>({
         accept: DndDraggable.LETTER,
         drop: ({ letter, sourcePosition }) => {
             const success = onDrop({
@@ -38,7 +38,10 @@ export function GameCellDndTarget({
                 dragResultType: GameCellDragResultType.ABORT,
             };
         },
+        collect: monitor => ({
+            hovered: monitor.isOver()
+        })
     });
 
-    return <GameCell {...gameCellProps} innerRef={dropRef} />;
+    return <GameCell {...gameCellProps} hovered={hovered} innerRef={dropRef} />;
 }
