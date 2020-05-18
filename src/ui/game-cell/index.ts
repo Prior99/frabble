@@ -1,0 +1,1 @@
+export { GameCell, GameCellProps, BaseGameCellProps } from "./game-cell";

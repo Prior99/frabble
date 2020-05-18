@@ -8,8 +8,7 @@ import { LobbyMode, GameState } from "../../types";
 import "./page-game.scss";
 import { Game } from "../../game";
 import { invariant } from "../../utils";
-import { Lobby, UiBoard } from "../../ui";
-import { UiStand } from "../../ui/ui-stand";
+import { Lobby, GameBoard, GameStand } from "../../ui";
 import { DndProvider } from "react-dnd";
 import Backend from 'react-dnd-html5-backend'
 
@@ -39,8 +38,8 @@ export class PageGame extends React.Component<RouteProps<PageGameProps>> {
                 return (
                     <DndProvider backend={Backend}>
 
-                        <UiBoard className="PageGame__board" />
-                        <UiStand userId={this.game.users.ownUser.id} className="PageGame__stand"/>
+                        <GameBoard className="PageGame__board" />
+                        <GameStand playerId={this.game.users.ownUser.id} className="PageGame__stand"/>
                     </DndProvider>
                 );
             default:

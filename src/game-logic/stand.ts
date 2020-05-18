@@ -4,33 +4,50 @@ import { insert } from "ramda";
 
 export class Stand {
     public static readonly MAX_LETTERS = 7;
+    public static readonly EMPTY = 3;
 
-    @observable public letters: Letter[] = [];
+    @observable public letters = new Map<number, Letter | undefined>();
 
     constructor(letters: Letter[]) {
-        this.letterAdd(...letters);
+        this.add(...letters);
+    }
+
+    @computed private get count(): number {
+        return Array.from(this.letters.values()).filter(value => value !== undefined).length;
     }
 
     @computed public get missingLetterCount() {
-        return Stand.MAX_LETTERS - this.letters.length;
+        return Stand.MAX_LETTERS - this.count;
     }
 
-    @action.bound public letterAdd(...letters: Letter[]) {
-        this.letters.push(...letters);
-    }
-
-    @action.bound public letterAddAt(index: number, letter: Letter) {
-        this.letters = insert(index, letter, this.letters);
-    }
-
-    @action.bound public letterRemove(...indices: number[]): Letter[] {
-        if (indices.length >= this.letters.length) {
-            throw new Error(`There aren't enough letters on the stand to remove ${indices.length} letters`);
+    @action.bound public add(...letters: Letter[]) {
+        for (const letter of letters) {
+            for (let index = 0; ; ++index) {
+                if (this.at(index) === undefined) {
+                    this.set(index, letter);
+                    break;
+                }
+            }
         }
+    }
 
-        const removedLetters = indices.map((index) => this.letters[index]);
-        this.letters = this.letters.filter((_, index) => !indices.includes(index));
+    @action.bound public set(index: number, letter: Letter) {
+        this.letters.set(index, letter);
+    }
 
-        return removedLetters;
+    @action.bound public remove(...indices: number[]): Letter[] {
+        const removedLetters = indices.map((index) => this.at(index)).filter(value => value !== undefined);
+        for (const index of indices) {
+            this.letters.set(index, undefined);
+        }
+        return removedLetters as Letter[];
+    }
+
+    public at(index: number): Letter | undefined {
+        return this.letters.get(index);
+    }
+
+    @computed public get maxIndex(): number {
+        return Math.max(...Array.from(this.letters.keys()), Stand.MAX_LETTERS, Stand.EMPTY);
     }
 }

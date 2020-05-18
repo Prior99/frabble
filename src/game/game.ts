@@ -1,7 +1,7 @@
 import { create as randomSeed, RandomSeed } from "random-seed";
 import { computed, action, observable } from "mobx";
 import { Peer, Host, Client } from "../networking";
-import { NetworkingMode, GameState, Language, RemoteUser, Letter } from "../types";
+import { NetworkingMode, GameState, Language, RemoteUser, Letter, CellPosition, Cell, CellPositionType } from "../types";
 import { RemoteUsers } from "./remote-users";
 import { component } from "tsdi";
 import { GameConfig } from "../types";
@@ -9,7 +9,7 @@ import { v4 } from "uuid";
 import { Board } from "../game-logic";
 import { LetterBag } from "../game-logic/letter-bag";
 import { prop } from "ramda";
-import { shuffle, Vec2 } from "../utils";
+import { shuffle, Vec2, invariant } from "../utils";
 import { Stand } from "../game-logic/stand";
 
 @component
@@ -65,8 +65,28 @@ export class Game {
         this.peer.sendGameStart(this.config);
     }
 
+    @action.bound public moveCell(sourcePosition: CellPosition, targetPosition: CellPosition): void {
+        this.peer?.sendCellMove({ sourcePosition, targetPosition });
+    }
+
     @action.bound private awardScore() {
         // TODO: Implement.
+    }
+
+    public getLetter(position: CellPosition): Letter | undefined {
+        switch (position.positionType) {
+            case CellPositionType.BOARD:
+                const cell = this.board.at(position.position);
+                if (cell.empty) { return; }
+                return cell.letter;
+            case CellPositionType.STAND:
+                const stand = this.stands.get(position.playerId);
+                if (!stand) {
+                    throw new Error(`Couldn't find stand for player ${position.playerId}`);
+                }
+                return stand.at(position.index);
+            default: invariant(position);
+        }
     }
 
     @action.bound public async initialize(networkId?: string): Promise<void> {
@@ -97,36 +117,50 @@ export class Game {
             });
             this.turn = 0;
         }));
-        this.peer.onLetterPlace(action((pos: Vec2, sourceLetterIndex: number) => {
-            const [letter] = this.currentStand.letterRemove(sourceLetterIndex);
-            this.board.letterPlace(pos, letter, this.currentUserId, this.turn);
-        }));
-        this.peer.onLetterRemove(action((pos: Vec2, targetIndex: number | undefined) => {
-            const cell = this.board.letterRemove(pos);
-
-            if (cell.empty) {
-                throw new Error("Cannot remove letter from empty cell.");
+        this.peer.onCellMove(action((sourcePosition: CellPosition, targetPosition: CellPosition) => {
+            const letter = this.getLetter(sourcePosition);
+            if (!letter) {
+                throw new Error("Cannot move empty cell.");
             }
-
-            const { letter } = cell;
-            if (targetIndex === undefined) {
-                this.currentStand.letterAdd(letter);
-            } else {
-                this.currentStand.letterAddAt(targetIndex, letter);
+            switch (sourcePosition.positionType) {
+                case CellPositionType.STAND:
+                    const stand = this.stands.get(sourcePosition.playerId);
+                    if (!stand) {
+                        throw new Error(`Couldn't find stand for player ${sourcePosition.playerId}`);
+                    }
+                    stand.remove(sourcePosition.index);
+                    break;
+                case CellPositionType.BOARD:
+                    this.board.letterRemove(sourcePosition.position);
+                    break;
+                default: invariant(sourcePosition);
+            }
+            switch (targetPosition.positionType) {
+                case CellPositionType.STAND:
+                    const stand = this.stands.get(targetPosition.playerId);
+                    if (!stand) {
+                        throw new Error(`Couldn't find stand for player ${targetPosition.playerId}`);
+                    }
+                    stand.set(targetPosition.index, letter);
+                    break;
+                case CellPositionType.BOARD:
+                    this.board.letterPlace(targetPosition.position, letter, this.currentUserId, this.turn);
+                    break;
+                default: invariant(targetPosition);
             }
         }));
         this.peer.onEndTurn(action(() => {
             this.awardScore();
             const newLetters = this.letterBag.takeMany(this.currentStand.missingLetterCount);
-            this.currentStand.letterAdd(...newLetters);
+            this.currentStand.add(...newLetters);
 
             this.turn++;
         }));
         this.peer.onPass(action((exchangedLetterIndices: number[]) => {
-            const removedLetters = this.currentStand.letterRemove(...exchangedLetterIndices);
+            const removedLetters = this.currentStand.remove(...exchangedLetterIndices);
             const newLetters = this.letterBag.exchange(...removedLetters);
 
-            this.currentStand.letterAdd(...newLetters);
+            this.currentStand.add(...newLetters);
         }));
 
         if (this.peer instanceof Host) {

@@ -1,34 +1,28 @@
 import * as React from "react";
-import { UiCell, UiCellDragMode } from "../ui-cell";
-import { Board } from "../../game-logic/board";
+import { GameCellDnd, GameCellDndMode, DropInfo } from "../game-cell-dnd";
 import { computed, action } from "mobx";
 import { observer } from "mobx-react";
 import classNames from "classnames";
-import "./ui-board.scss";
-import { Cell } from "../../types";
+import "./game-board.scss";
+import { CellPositionType } from "../../types";
 import { external, inject } from "tsdi";
 import { Game } from "../../game";
-import { Vec2 } from "../../utils";
 
-export interface UiBoardProps {
+export interface GameBoardProps {
     className?: string;
 }
 
 @observer
 @external
-export class UiBoard extends React.Component<UiBoardProps> {
+export class GameBoard extends React.Component<GameBoardProps> {
     @inject private game!: Game;
 
     @computed private get board() {
         return this.game.board;
     }
 
-    @action.bound private onPlaceLetter(position: Vec2, cell: Cell): boolean {
-        if (cell.empty) {
-            throw new Error("Cannot drop empty tile on board.");
-        }
-        this.board.letterPlace(position, cell.letter, cell.playerId, cell.turn);
-
+    @action.bound private onPlaceLetter({ targetPosition, sourcePosition }: DropInfo): boolean {
+        this.game.moveCell(sourcePosition, targetPosition);
         return true;
     }
 
@@ -36,14 +30,14 @@ export class UiBoard extends React.Component<UiBoardProps> {
         const result: JSX.Element[] = [];
         for (const { cell, mode, position } of this.board.iterator()) {
             result.push(
-                <UiCell
+                <GameCellDnd
                     key={`${position.x}-${position.y}`}
-                    className="Board__cell"
-                    cell={cell}
-                    mode={mode}
-                    dragMode={UiCellDragMode.TARGET}
+                    className="GameBoard__cell"
+                    cellMode={mode}
+                    letter={!cell.empty ? cell.letter : undefined}
+                    dragMode={GameCellDndMode.TARGET}
                     onDrop={this.onPlaceLetter}
-                    position={position}
+                    position={{ positionType: CellPositionType.BOARD, position }}
                 />,
             );
         }
@@ -51,15 +45,15 @@ export class UiBoard extends React.Component<UiBoardProps> {
     }
 
     @computed private get classNames(): string {
-        return classNames("Board", this.props.className);
+        return classNames("GameBoard", this.props.className);
     }
 
     public render() {
         console.log("Start board render");
         return (
             <div className={this.classNames}>
-                <div className="Board__container">
-                    <div className="Board__cells">{this.cells}</div>
+                <div className="GameBoard__container">
+                    <div className="GameBoard__cells">{this.cells}</div>
                 </div>
             </div>
         );

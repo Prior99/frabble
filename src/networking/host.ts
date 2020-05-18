@@ -28,8 +28,7 @@ export class Host extends Peer {
         console.info(`Received client message from ${userId}:`, message);
         switch (message.message) {
             case ClientMessageType.END_TURN:
-            case ClientMessageType.LETTER_PLACE:
-            case ClientMessageType.LETTER_REMOVE:
+            case ClientMessageType.CELL_MOVE:
             case ClientMessageType.PASS:
                 this.broadcastMessage({
                     message: HostMessageType.RELAYED_CLIENT_MESSAGE,

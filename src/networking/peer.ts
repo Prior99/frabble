@@ -9,11 +9,13 @@ import {
     ClientMessageType,
     ClientMessage,
     GameConfig,
-    Letter,
     BaseClientMessage,
+    CellMoveInfo,
+    CellPosition,
+    Letter,
 } from "../types";
 import { observable } from "mobx";
-import { Vec2, vec2, invariant } from "../utils";
+import { Vec2, vec2, invariant, serializeCellPosition, deserializeCellPosition } from "../utils";
 import { RemoteUsers } from "../game";
 
 export abstract class Peer extends EventEmitter {
@@ -30,8 +32,7 @@ export abstract class Peer extends EventEmitter {
     public onUserConnected = this.registerEvent<(user: RemoteUser) => void>();
     public onUserDisconnected = this.registerEvent<(userId: string) => void>();
     public onGameStart = this.registerEvent<(config: GameConfig) => void>();
-    public onLetterRemove = this.registerEvent<(position: Vec2, targetLetterIndex: number | undefined) => void>();
-    public onLetterPlace = this.registerEvent<(position: Vec2, sourceLetterIndex: number) => void>();
+    public onCellMove = this.registerEvent<(sourcePosition: CellPosition, targetPosition: CellPosition) => void>();
     public onPass = this.registerEvent<(indices: number[]) => void>();
     public onEndTurn = this.registerEvent<() => void>();
 
@@ -51,10 +52,12 @@ export abstract class Peer extends EventEmitter {
             case HostMessageType.RELAYED_CLIENT_MESSAGE:
                 const { clientMessage } = message;
                 switch (clientMessage.message) {
-                    case ClientMessageType.LETTER_PLACE:
-                        return this.emit(this.onLetterPlace, vec2(...clientMessage.position), clientMessage.sourceLetterIndex);
-                    case ClientMessageType.LETTER_REMOVE:
-                        return this.emit(this.onLetterRemove, vec2(...clientMessage.position), clientMessage.targetLetterIndex);
+                    case ClientMessageType.CELL_MOVE:
+                        return this.emit(
+                            this.onCellMove,
+                            deserializeCellPosition(clientMessage.sourcePosition),
+                            deserializeCellPosition(clientMessage.targetPosition),
+                        );
                     case ClientMessageType.PASS:
                         return this.emit(this.onPass, clientMessage.exchangedLetterIndices);
                     case ClientMessageType.END_TURN:
@@ -85,7 +88,10 @@ export abstract class Peer extends EventEmitter {
         return this.peer.id;
     }
 
-    @bind protected sendToPeer(connection: PeerJS.DataConnection, message: HostMessage | (ClientMessage & BaseClientMessage)): void {
+    @bind protected sendToPeer(
+        connection: PeerJS.DataConnection,
+        message: HostMessage | (ClientMessage & BaseClientMessage),
+    ): void {
         connection.send(message);
     }
 
@@ -96,19 +102,11 @@ export abstract class Peer extends EventEmitter {
         });
     }
 
-    @bind public sendLetterPlace(position: Vec2, sourceLetterIndex: number): void {
+    @bind public sendCellMove(info: CellMoveInfo): void {
         this.sendClientMessage({
-            message: ClientMessageType.LETTER_PLACE,
-            position: [position.x, position.y],
-            sourceLetterIndex,
-        });
-    }
-
-    @bind public sendLetterRemove(position: Vec2, targetLetterIndex: number | undefined): void {
-        this.sendClientMessage({
-            message: ClientMessageType.LETTER_REMOVE,
-            position: [position.x, position.y],
-            targetLetterIndex
+            message: ClientMessageType.CELL_MOVE,
+            sourcePosition: serializeCellPosition(info.sourcePosition),
+            targetPosition: serializeCellPosition(info.targetPosition),
         });
     }
 

@@ -1,10 +1,10 @@
 import { RemoteUser } from "./remote-user";
 import { Letter } from "../types";
+import { SerializedCellPosition } from "../utils";
 
 export enum ClientMessageType {
     HELLO = "hello",
-    LETTER_PLACE = "letter place",
-    LETTER_REMOVE = "letter remove",
+    CELL_MOVE = "cell move",
     PASS = "pass",
     END_TURN = "end turn",
 }
@@ -24,16 +24,10 @@ export interface ClientMessagePass {
     exchangedLetterIndices: number[];
 }
 
-export interface ClientMessageLetterPlace {
-    message: ClientMessageType.LETTER_PLACE;
-    sourceLetterIndex: number;
-    position: [number, number];
-}
-
-export interface ClientMessageLetterRemove {
-    message: ClientMessageType.LETTER_REMOVE;
-    position: [number, number];
-    targetLetterIndex?: number;
+export interface ClientMessageCellMove {
+    message: ClientMessageType.CELL_MOVE;
+    sourcePosition: SerializedCellPosition;
+    targetPosition: SerializedCellPosition;
 }
 
 export interface ClientMessageEndTurn {
@@ -43,6 +37,5 @@ export interface ClientMessageEndTurn {
 export type ClientMessage =
     | ClientMessageHello
     | ClientMessageEndTurn
-    | ClientMessageLetterPlace
-    | ClientMessageLetterRemove
+    | ClientMessageCellMove
     | ClientMessagePass;

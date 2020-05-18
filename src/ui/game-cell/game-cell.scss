@@ -29,7 +29,7 @@ $cellDescription: (
 
 $cellFontSize: (50 / 15) + vw;
 
-.Cell {
+.GameCell {
     border: 1px solid $white;
     display: flex;
     justify-content: center;
@@ -49,12 +49,12 @@ $cellFontSize: (50 / 15) + vw;
         display: flex;
         justify-content: center;
 
-        & > .Cell__letter {
+        & > .GameCell__letter {
             position: absolute;
             font-size: calc(#{$cellFontSize} * 0.9);
         }
 
-        & > .Cell__points {
+        & > .GameCell__points {
             position: absolute;
             color: lighten(color("primary", 2), 35%);
             font-size: calc(#{$cellFontSize} * 0.5);
@@ -66,14 +66,14 @@ $cellFontSize: (50 / 15) + vw;
     }
 
     &--empty {
-        & > .Cell__points {
+        & > .GameCell__points {
             display: none;
         }
 
         @each $className, $modeName in $cellModes {
             $color: map-get($cellColors, $modeName);
 
-            &.Cell--#{$className} {
+            &.GameCell--#{$className} {
                 background-color: lighten($color, 10%);
 
                 &::after {
@@ -82,7 +82,7 @@ $cellFontSize: (50 / 15) + vw;
                 }
             }
 
-            &.Cell--root {
+            &.GameCell--root {
                 &::after {
                     font-size: calc(#{$cellFontSize} * 1.5);
                     padding-top: calc(#{$cellFontSize} * 0.15);
