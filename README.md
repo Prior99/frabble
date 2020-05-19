@@ -10,11 +10,11 @@ The game uses WebRTC Data channels for true serverless multiplayer in the browse
 
 [![play](https://raw.githubusercontent.com/Prior99/frabble/master/images/play.png)](https://prior99.gitlab.io/frabble)
 
+# Features
+
 <p align="center">
     <img src="https://raw.githubusercontent.com/Prior99/frabble/master/images/screenshot-1.png">
 </p>
-
-# Features
 
 The following is implemented:
 
