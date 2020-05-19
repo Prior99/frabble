@@ -92,7 +92,6 @@ export class GameContainer extends React.Component<GameContainerProps> {
                                                     className="GameContainer__progress"
                                                     percent={this.game.progressPercent}
                                                     content={`${this.game.secondsLeft}s`}
-                                                    active
                                                     color={
                                                         this.game.currentUserId === this.game.users.ownUser.id
                                                             ? "blue"

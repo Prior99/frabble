@@ -129,15 +129,15 @@
             @include button($color);
         }
         > .label {
-            color: darken($color, 20%);
+            color: darken($color, 10%);
         }
     }
 
-    &__progress.ui.active.blue {
-        @include progress(color("primary", 2));
+    &__progress.ui.blue {
+        @include progress(lighten(color("primary", 1), 5%));
     }
 
-    &__progress.ui.active.error {
-        @include progress(color("secondary2", 3));
+    &__progress.ui.error {
+        @include progress(lighten(color("secondary2", 0), 5%));
     }
 }
