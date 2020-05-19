@@ -1,8 +1,8 @@
 import { create as randomSeed, RandomSeed } from "random-seed";
-import { allLetters, getLetterOccurence } from "./letters";
 import { Letter } from "../types";
 import { shuffle } from "../utils";
 import { action, computed, observable } from "mobx";
+import { getLetterOccurence, allLetters } from "./letters";
 
 export class LetterBag {
     @observable private letters: Letter[] = [];
@@ -14,20 +14,11 @@ export class LetterBag {
     }
 
     public refill(): void {
-        // for (const letter of allLetters()) {
-        //     for (let i = 0; i < getLetterOccurence(letter); ++i) {
-        //         this.letters.push(letter);
-        //     }
-        // }
-        this.letters.push(Letter.A);
-        this.letters.push(Letter.A);
-        this.letters.push(Letter.A);
-        this.letters.push(Letter.A);
-        this.letters.push(Letter.A);
-        this.letters.push(Letter.A);
-        this.letters.push(Letter.A);
-        this.letters.push(Letter.A);
-        this.letters.push(Letter.A);
+        for (const letter of allLetters()) {
+            for (let i = 0; i < getLetterOccurence(letter); ++i) {
+                this.letters.push(letter);
+            }
+        }
         this.shuffle();
     }
 
