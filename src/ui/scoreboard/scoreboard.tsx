@@ -23,7 +23,7 @@ export class Scoreboard extends React.Component<ScoreboardProps> {
 
     public render(): JSX.Element {
         return (
-            <Table className={this.classNames}>
+            <Table unstackable className={this.classNames}>
                 <Table.Header>
                     <Table.Row>
                         <Table.HeaderCell className="Scoreboard__rankHeader">

@@ -1,16 +1,25 @@
 @import "../../variables.scss";
 
 .GameContainer {
-    display: flex;
-    box-sizing: border-box;
-    padding: $gutter / 2;
-    justify-content: center;
-
     @media (orientation: landscape) {
-        flex-direction: row;
+        height: 100%;
+        display: flex;
+        align-items: center;
     }
-    @media (orientation: portrait) {
-        flex-direction: column;
+
+    &__container {
+        display: flex;
+        box-sizing: border-box;
+        padding: $gutter / 2;
+        justify-content: center;
+        width: 100%;
+
+        @media (orientation: landscape) {
+            flex-direction: row;
+        }
+        @media (orientation: portrait) {
+            flex-direction: column;
+        }
     }
 
     &__mainArea {
@@ -54,7 +63,6 @@
 
         @media (orientation: landscape) {
             padding-left: $gutter;
-            padding-top: $gutter;
             max-width: 350px;
         }
 

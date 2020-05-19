@@ -62,96 +62,94 @@ export class GameContainer extends React.Component<GameContainerProps> {
                 return (
                     <DndProvider options={HTML5toTouch}>
                         <div className="GameContainer">
-                            <div className="GameContainer__mainArea">
-                                <Segment className="GameContainer__boardContainer">
-                                    <GameBoard className="GameContainer__board" />
-                                </Segment>
+                            <div className="GameContainer__container">
+                                <div className="GameContainer__mainArea">
+                                    <Segment className="GameContainer__boardContainer">
+                                        <GameBoard className="GameContainer__board" />
+                                    </Segment>
 
-                                <Popup
-                                    header="Passing"
-                                    content="Select the letters to exchange or just click confirm."
-                                    open={this.isPassing}
-                                    inverted
-                                    trigger={
-                                        <Segment className="GameContainer__standContainer">
-                                            <GameStand
-                                                playerId={this.game.users.ownUser.id}
-                                                className="GameContainer__stand"
-                                            />
+                                    <Popup
+                                        header="Passing"
+                                        content="Select the letters to exchange or just click confirm."
+                                        open={this.isPassing}
+                                        inverted
+                                        trigger={
+                                            <Segment className="GameContainer__standContainer">
+                                                <GameStand
+                                                    playerId={this.game.users.ownUser.id}
+                                                    className="GameContainer__stand"
+                                                />
+                                            </Segment>
+                                        }
+                                    />
+                                </div>
+                                <div className="GameContainer__sidebar">
+                                    <div className="GameContainer__statusContainer">
+                                        <Segment className="GameContainer__sidebarSegment">
+                                            <Status className="GameContainer__status" />
                                         </Segment>
-                                    }
-                                />
-                            </div>
-                            <div className="GameContainer__sidebar">
-                                <div className="GameContainer__statusContainer">
-                                    <h2>Status</h2>
-                                    <Segment className="GameContainer__sidebarSegment">
-                                        <Status className="GameContainer__status" />
-                                    </Segment>
-                                </div>
-                                <div className="GameContainer__scoreboardContainer">
-                                    <h2>Scoreboard</h2>
-                                    <Segment className="GameContainer__sidebarSegment">
-                                        <Scoreboard className="GameContainer__scoreboard" />
-                                    </Segment>
-                                </div>
-                                <div className="GameContainer__actions">
-                                    <h2>Actions</h2>
-                                    <Segment className="GameContainer__sidebarSegment">
-                                        <Popup
-                                            header="Cannot end turn"
-                                            content={this.buttonPopupContent}
-                                            disabled={this.canEndTurn}
-                                            inverted
-                                            trigger={
-                                                <span>
-                                                    <Button
-                                                        fluid
-                                                        disabled={!this.canEndTurn}
-                                                        icon="play"
-                                                        labelPosition="left"
-                                                        primary
-                                                        size="big"
-                                                        content="End turn"
-                                                        onClick={this.handleCommit}
-                                                        className="GameContainer__commitButton"
-                                                    />
-                                                </span>
-                                            }
-                                        />
-                                        <p />
-                                        {this.isPassing ? (
-                                            <Button.Group fluid size="big">
-                                                <Button
-                                                    content="Confirm"
-                                                    icon="check"
-                                                    labelPosition="left"
-                                                    positive
-                                                    onClick={this.confirmPassing}
-                                                />
-                                                <Button.Or />
-                                                <Button
-                                                    content="Abort"
-                                                    icon="cancel"
-                                                    labelPosition="right"
-                                                    negative
-                                                    onClick={this.abortPassing}
-                                                />
-                                            </Button.Group>
-                                        ) : (
-                                            <Button
-                                                fluid
-                                                disabled={!this.canPass}
-                                                icon="play"
-                                                labelPosition="left"
-                                                primary
-                                                size="big"
-                                                content="Pass"
-                                                onClick={this.startPassing}
-                                                className="GameContainer__commitButton"
+                                    </div>
+                                    <div className="GameContainer__scoreboardContainer">
+                                        <Segment className="GameContainer__sidebarSegment">
+                                            <Scoreboard className="GameContainer__scoreboard" />
+                                        </Segment>
+                                    </div>
+                                    <div className="GameContainer__actions">
+                                        <Segment className="GameContainer__sidebarSegment">
+                                            <Popup
+                                                header="Cannot end turn"
+                                                content={this.buttonPopupContent}
+                                                disabled={this.canEndTurn}
+                                                inverted
+                                                trigger={
+                                                    <span>
+                                                        <Button
+                                                            fluid
+                                                            disabled={!this.canEndTurn}
+                                                            icon="thumbs up"
+                                                            labelPosition="left"
+                                                            primary
+                                                            size="big"
+                                                            content="End turn"
+                                                            onClick={this.handleCommit}
+                                                            className="GameContainer__commitButton"
+                                                        />
+                                                    </span>
+                                                }
                                             />
-                                        )}
-                                    </Segment>
+                                            <p />
+                                            {this.isPassing ? (
+                                                <Button.Group fluid size="big">
+                                                    <Button
+                                                        content="Confirm"
+                                                        icon="check"
+                                                        labelPosition="left"
+                                                        positive
+                                                        onClick={this.confirmPassing}
+                                                    />
+                                                    <Button.Or />
+                                                    <Button
+                                                        content="Abort"
+                                                        icon="cancel"
+                                                        labelPosition="right"
+                                                        negative
+                                                        onClick={this.abortPassing}
+                                                    />
+                                                </Button.Group>
+                                            ) : (
+                                                <Button
+                                                    fluid
+                                                    disabled={!this.canPass}
+                                                    icon="step forward"
+                                                    labelPosition="left"
+                                                    size="big"
+                                                    content="Pass"
+                                                    onClick={this.startPassing}
+                                                    className="GameContainer__commitButton"
+                                                />
+                                            )}
+                                        </Segment>
+                                    </div>
                                 </div>
                             </div>
                         </div>
