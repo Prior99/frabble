@@ -42,7 +42,7 @@ pages:
   stage: deploy
   script:
     - mkdir public
-    - mv dist assets index.html images manifest.json public/
+    - mv dist index.html images manifest.json public/
   dependencies:
     - build
   artifacts:
