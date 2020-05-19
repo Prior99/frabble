@@ -1,11 +1,11 @@
 import * as React from "react";
 import { Route, addRoute, RouteProps } from "../../routing";
 import { external, inject } from "tsdi";
-import { Segment, Form, Tab, Input, TabProps, Checkbox } from "semantic-ui-react";
+import { Segment, Form, Tab, Input, TabProps } from "semantic-ui-react";
 import { Link } from "react-router-dom";
 import { observable, computed } from "mobx";
 import { observer } from "mobx-react";
-import { LobbyMode } from "../../types";
+import { LobbyMode, RemoteUser } from "../../types";
 import { routeGame } from "../page-game";
 import { bind } from "bind-decorator";
 import "./page-main-menu.scss";
@@ -20,34 +20,34 @@ export class PageMainMenu extends React.Component<RouteProps<{}>> {
     @observable private otherId = "";
     @observable private activeTab = 0;
 
-    @bind private handleNameChange(evt: React.SyntheticEvent<HTMLInputElement>) {
+    @bind private handleNameChange(evt: React.SyntheticEvent<HTMLInputElement>): void {
         this.game.users.setOwnUser({
             ...this.ownUser,
             name: evt.currentTarget.value,
         });
     }
 
-    @bind private handleOtherIdChange(evt: React.SyntheticEvent<HTMLInputElement>) {
+    @bind private handleOtherIdChange(evt: React.SyntheticEvent<HTMLInputElement>): void {
         this.otherId = evt.currentTarget.value;
     }
 
-    @bind private handleTabChange(_: unknown, { activeIndex }: TabProps) {
+    @bind private handleTabChange(_: unknown, { activeIndex }: TabProps): void {
         this.activeTab = activeIndex as number;
     }
 
-    @computed private get ownUser() {
+    @computed private get ownUser(): RemoteUser {
         return this.game.users.ownUser;
     }
 
-    private get nameValid() {
+    @computed private get nameValid(): boolean {
         return this.ownUser.name.length > 0 && this.ownUser.name.length < 24;
     }
 
-    private get panes() {
+    @computed private get panes(): { menuItem: string }[] {
         return [{ menuItem: "Join" }, { menuItem: "Host" }];
     }
 
-    public render() {
+    public render(): JSX.Element {
         return (
             <MenuContainer>
                 <Segment>

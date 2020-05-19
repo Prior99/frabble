@@ -3,6 +3,7 @@ import { BaseGameCellProps, GameCell } from "../game-cell";
 import { DropResult, DragItem, GameCellDndMode, GameCellDragResultType } from "./game-cell-dnd-types";
 import { useDrop } from "react-dnd";
 import React from "react";
+import { omit } from "ramda";
 
 export interface DropInfo extends CellMoveInfo{
     letter: Letter;
@@ -16,7 +17,6 @@ export interface GameCellDndTargetProps extends BaseGameCellProps {
 
 export function GameCellDndTarget({
     onDrop,
-    dragMode,
     position: targetPosition,
     ...gameCellProps
 }: GameCellDndTargetProps): JSX.Element {
@@ -43,5 +43,5 @@ export function GameCellDndTarget({
         })
     });
 
-    return <GameCell {...gameCellProps} hovered={hovered} innerRef={dropRef} />;
+    return <GameCell {...omit(["dragMode"], gameCellProps)} hovered={hovered} innerRef={dropRef} />;
 }

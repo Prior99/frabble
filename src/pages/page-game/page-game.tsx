@@ -18,7 +18,7 @@ export interface PageGameProps {
 export class PageGame extends React.Component<RouteProps<PageGameProps>> {
     @inject private game!: Game;
 
-    async componentDidMount() {
+    async componentDidMount(): Promise<void> {
         if (this.props.match.params.lobbyMode === LobbyMode.HOST) {
             await this.game.initialize();
         } else {

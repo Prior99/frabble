@@ -8,7 +8,7 @@ import "./game-container.scss";
 import { Game } from "../../game";
 import { invariant } from "../../utils";
 import { Lobby, GameBoard, GameStand } from "../../ui";
-import { Button, Segment, Popup, Form } from "semantic-ui-react";
+import { Button, Segment, Popup } from "semantic-ui-react";
 import { action, computed } from "mobx";
 import { Scoreboard } from "../scoreboard/scoreboard";
 import { Status } from "../status";
@@ -22,19 +22,19 @@ export interface GameContainerProps {
 export class GameContainer extends React.Component<GameContainerProps> {
     @inject private game!: Game;
 
-    @action.bound private handleCommit() {
+    @action.bound private handleCommit(): void {
         this.game.endTurn();
     }
 
-    @action.bound private startPassing() {
+    @action.bound private startPassing(): void {
         this.game.startPassing();
     }
 
-    @action.bound private confirmPassing() {
+    @action.bound private confirmPassing(): void {
         this.game.confirmPassing();
     }
 
-    @action.bound private abortPassing() {
+    @action.bound private abortPassing(): void {
         this.game.abortPassing();
     }
 

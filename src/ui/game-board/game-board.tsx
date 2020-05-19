@@ -17,7 +17,7 @@ export interface GameBoardProps {
 export class GameBoard extends React.Component<GameBoardProps> {
     @inject private game!: Game;
 
-    @computed private get board() {
+    @computed private get board(): Board {
         return this.game.board;
     }
 
@@ -41,8 +41,7 @@ export class GameBoard extends React.Component<GameBoardProps> {
         });
     }
 
-    public render() {
-        console.log("Start board render");
+    public render(): JSX.Element {
         return (
             <div className={this.classNames}>
                 <div className="GameBoard__container">

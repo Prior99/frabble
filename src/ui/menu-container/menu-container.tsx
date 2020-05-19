@@ -12,7 +12,7 @@ export class MenuContainer extends React.Component<MenuContainerProps> {
         return classNames("MenuContainer", this.props.className)
     }
 
-    public render() {
+    public render(): JSX.Element {
         return (
             <div className={this.classNames}>
                 {this.props.children}

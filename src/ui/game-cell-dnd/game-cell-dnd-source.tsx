@@ -7,9 +7,9 @@ import {
     GameCellDndMode,
 } from "./game-cell-dnd-types";
 import { DndDraggable, Letter, CellPosition } from "../../types";
-import { invariant } from "../../utils";
 import React from "react";
 import { BaseGameCellProps, GameCell } from "../game-cell";
+import { omit } from "ramda";
 
 export interface DragStartInfo {
     sourcePosition: CellPosition;
@@ -25,14 +25,13 @@ export interface GameCellDndSourceProps extends BaseGameCellProps {
 }
 
 export function GameCellDndSource({
-    dragMode,
     onDragStart,
     onDragStop,
     position: sourcePosition,
     ...gameCellProps
 }: GameCellDndSourceProps): JSX.Element {
     const { letter } = gameCellProps;
-    const [_, dragRef] = useDrag<DragItem, DropResult, {}>({
+    const [_collected, dragRef] = useDrag<DragItem, DropResult, {}>({
         item: {
             type: DndDraggable.LETTER,
             letter,
@@ -57,5 +56,5 @@ export function GameCellDndSource({
         },
     });
 
-    return <GameCell innerRef={dragRef} {...gameCellProps} />;
+    return <GameCell innerRef={dragRef} {...omit(["dragMode"], gameCellProps)} />;
 }

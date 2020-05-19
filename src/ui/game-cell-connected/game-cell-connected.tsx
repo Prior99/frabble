@@ -31,8 +31,10 @@ export class GameCellConnected extends React.Component<GameCellConnectedProps> {
         return this.game.turn !== this.turn;
     }
 
-    @computed private get markedForExchange() {
-        return this.game.lettersToExchange?.some(exchange => cellPositionEquals(exchange, this.props.position));
+    @computed private get markedForExchange(): boolean {
+        return (
+            this.game.lettersToExchange?.some((exchange) => cellPositionEquals(exchange, this.props.position)) ?? false
+        );
     }
 
     @computed private get faded(): boolean {
@@ -59,13 +61,13 @@ export class GameCellConnected extends React.Component<GameCellConnectedProps> {
         return this.game.getCellTurn(this.props.position);
     }
 
-    @computed private get classNames() {
+    @computed private get classNames(): string {
         return classnames(
             {
                 GameCellConnected: true,
                 "GameCellConnected--faded": this.faded,
                 "GameCellConnected--permanent": this.permanent,
-                "GameCellConnected--passing": this.game.isPassing
+                "GameCellConnected--passing": this.game.isPassing,
             },
             this.props.className,
         );
@@ -76,15 +78,15 @@ export class GameCellConnected extends React.Component<GameCellConnectedProps> {
         return true;
     }
 
-    @action.bound private handleDragStart() {
+    @action.bound private handleDragStart(): void {
         this.dragging = true;
     }
 
-    @action.bound private handleDragStop() {
+    @action.bound private handleDragStop(): void {
         this.dragging = false;
     }
 
-    @action.bound private handleClick() {
+    @action.bound private handleClick(): void {
         if (this.props.position.positionType !== CellPositionType.STAND || !this.game.isPassing) {
             return;
         }
@@ -109,7 +111,7 @@ export class GameCellConnected extends React.Component<GameCellConnectedProps> {
         }
     }
 
-    @computed private get immovable() {
+    @computed private get immovable(): boolean {
         if (this.permanent) {
             return true;
         }

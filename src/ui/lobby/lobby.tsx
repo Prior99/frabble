@@ -30,11 +30,11 @@ export interface LobbyProps {
 export class Lobby extends React.Component<LobbyProps> {
     @inject private game!: Game;
 
-    @action.bound private handleLanguageChange(_: unknown, { value }: DropdownProps) {
+    @action.bound private handleLanguageChange(_: unknown, { value }: DropdownProps): void {
         this.game.config.language = value as Language;
     }
 
-    @action.bound private handleTimeLimitChange(evt: React.SyntheticEvent<HTMLInputElement>) {
+    @action.bound private handleTimeLimitChange(evt: React.SyntheticEvent<HTMLInputElement>): void {
         const value = evt.currentTarget.value;
         const parsed = Number(value);
         if (!value || isNaN(parsed)) {
@@ -43,7 +43,7 @@ export class Lobby extends React.Component<LobbyProps> {
         this.game.config.timeLimit = parsed;
     }
 
-    @action.bound private handleTimeLimitToggle() {
+    @action.bound private handleTimeLimitToggle(): void {
         if (this.game.config.timeLimit === undefined) {
             this.game.config.timeLimit = 60;
             return;
@@ -51,7 +51,7 @@ export class Lobby extends React.Component<LobbyProps> {
         this.game.config.timeLimit = undefined;
     }
 
-    @action.bound private handleStartClick() {
+    @action.bound private handleStartClick(): void {
         this.game.startGame();
     }
 
@@ -80,30 +80,28 @@ export class Lobby extends React.Component<LobbyProps> {
         return this.game.networkMode === NetworkingMode.HOST;
     }
 
-    @action.bound private async handleIdClick() {
+    @action.bound private async handleIdClick(): Promise<void> {
         if (this.hasClipboardApi) {
-            const anyNavigator = navigator as any;
-            await anyNavigator.clipboard.writeText(this.connectUrl);
+            await navigator.clipboard.writeText(this.connectUrl);
         }
     }
 
-    @computed private get hasClipboardApi() {
-        const anyNavigator = navigator as any;
-        return Boolean(anyNavigator.clipboard);
+    @computed private get hasClipboardApi(): boolean {
+        return Boolean(navigator.clipboard);
     }
 
-    @computed private get connectUrl() {
+    @computed private get connectUrl(): string {
         return location.href.replace(location.hash, `#/game/client/${this.game.peer?.networkId}`);
     }
 
-    @computed private get popupText() {
+    @computed private get popupText(): string {
         if (this.hasClipboardApi) {
             return "Copied to clipboard.";
         }
         return `Can't copy to clipboard: "${this.connectUrl}".`;
     }
 
-    public render() {
+    public render(): JSX.Element {
         return (
             <MenuContainer className={this.props.className}>
                 <Grid>
@@ -169,7 +167,9 @@ export class Lobby extends React.Component<LobbyProps> {
                                         </Form>
                                     </>
                                 ) : (
-                                    <p>Please wait <b>patiently</b> for the host to start the game...</p>
+                                    <p>
+                                        Please wait <b>patiently</b> for the host to start the game...
+                                    </p>
                                 )}
                             </Segment>
                         </Grid.Column>

@@ -7,6 +7,7 @@ import classnames from "classnames";
 import { CellPositionType } from "../../types";
 import "./game-stand.scss";
 import { GameCellConnected } from "../game-cell-connected";
+import { Stand } from "../../game-logic/stand";
 
 export interface GameStandProps {
     className?: string;
@@ -18,11 +19,11 @@ export interface GameStandProps {
 export class GameStand extends React.Component<GameStandProps> {
     @inject private game!: Game;
 
-    @computed private get stand() {
+    @computed private get stand(): Stand | undefined {
         return this.game.stands.get(this.props.playerId);
     }
 
-    @computed private get classNames() {
+    @computed private get classNames(): string {
         return classnames("GameStand", this.props.className);
     }
 

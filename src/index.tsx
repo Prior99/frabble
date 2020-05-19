@@ -12,19 +12,14 @@ import "./main.scss";
 const tsdi = new TSDI();
 tsdi.enableComponentScanner();
 
-async function main() {
-    ReactDOM.render(
-        <Router history={tsdi.get("history")}>
-            <Switch>
-                <Redirect exact from="/" to={routeMainMenu.path()} />
-                {getRoutes().map((route, index) => (
-                    <Route path={route.pattern} component={route.component} key={index} />
-                ))}
-            </Switch>
-        </Router>,
-        document.getElementById("app"),
-    );
-}
-
-main();
-
+ReactDOM.render(
+    <Router history={tsdi.get("history")}>
+        <Switch>
+            <Redirect exact from="/" to={routeMainMenu.path()} />
+            {getRoutes().map((route, index) => (
+                <Route path={route.pattern} component={route.component} key={index} />
+            ))}
+        </Switch>
+    </Router>,
+    document.getElementById("app"),
+);

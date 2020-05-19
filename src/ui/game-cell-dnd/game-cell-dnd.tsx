@@ -8,7 +8,7 @@ import { GameCellDndTarget, GameCellDndTargetProps } from "./game-cell-dnd-targe
 
 export type GameCellDndProps = GameCellDndBasicProps | GameCellDndTargetProps | GameCellDndSourceProps;
 
-export function GameCellDnd(props: GameCellDndProps) {
+export function GameCellDnd(props: GameCellDndProps): JSX.Element {
     switch (props.dragMode) {
         case GameCellDndMode.NONE:
             return <GameCell {...omit(["dragMode"], props)} />;

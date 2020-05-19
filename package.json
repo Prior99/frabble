@@ -5,7 +5,7 @@
     "scripts": {
         "build": "webpack",
         "start": "webpack-dev-server",
-        "lint": "eslint --max-warnings 0 src/**/*.ts* test/**/*.ts*"
+        "lint": "eslint --max-warnings 0 src/**/*.ts src/**/*.tsx test/**/*.ts*"
     },
     "license": "MIT",
     "prettier": {
@@ -37,7 +37,8 @@
             "@typescript-eslint/no-unused-vars": [
                 "error",
                 {
-                    "argsIgnorePattern": "^_"
+                    "argsIgnorePattern": "^_",
+                    "varsIgnorePattern": "^_"
                 }
             ]
         },
