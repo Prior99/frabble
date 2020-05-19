@@ -54,6 +54,7 @@
     "dependencies": {
         "bind-decorator": "^1.0.11",
         "classnames": "^2.2.6",
+        "mobx": "^5.15.4",
         "mobx-react": "^6.2.2",
         "peerjs": "^1.2.0",
         "ramda": "^0.27.0",
