@@ -123,4 +123,21 @@
     &__confirmButton {
         @include button(color("secondary1", 0));
     }
+
+    @mixin progress($color) {
+        > .bar {
+            @include button($color);
+        }
+        > .label {
+            color: darken($color, 20%);
+        }
+    }
+
+    &__progress.ui.active.blue {
+        @include progress(color("primary", 2));
+    }
+
+    &__progress.ui.active.error {
+        @include progress(color("secondary2", 3));
+    }
 }

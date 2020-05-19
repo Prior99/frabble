@@ -128,11 +128,11 @@ export class Lobby extends React.Component<LobbyProps> {
                                                 />
                                             </Form.Field>
                                             <Form.Field>
-                                                <label>Use timer</label>
                                                 <Checkbox
-                                                    toggle
+                                                    className="Lobby__toggle"
                                                     checked={this.timeLimitEnabled}
                                                     onChange={this.handleTimeLimitToggle}
+                                                    label="Use timer"
                                                 />
                                             </Form.Field>
                                             <Form.Field disabled={!this.timeLimitEnabled}>
@@ -146,9 +146,8 @@ export class Lobby extends React.Component<LobbyProps> {
                                                 fluid
                                                 className="Lobby__startButton"
                                                 onClick={this.handleStartClick}
-                                            >
-                                                Start
-                                            </Form.Button>
+                                                content="Start"
+                                            />
                                         </Form>
                                     </>
                                 ) : (

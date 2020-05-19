@@ -8,7 +8,7 @@ import "./game-container.scss";
 import { Game } from "../../game";
 import { invariant } from "../../utils";
 import { Lobby, GameBoard, GameStand } from "../../ui";
-import { Button, Segment, Popup } from "semantic-ui-react";
+import { Button, Segment, Popup, Progress } from "semantic-ui-react";
 import { action, computed } from "mobx";
 import { Scoreboard } from "../scoreboard/scoreboard";
 import { Status } from "../status";
@@ -87,6 +87,23 @@ export class GameContainer extends React.Component<GameContainerProps> {
                                     <div className="GameContainer__statusContainer">
                                         <Segment className="GameContainer__sidebarSegment">
                                             <Status className="GameContainer__status" />
+                                            {this.game.showProgress && (
+                                                <Progress
+                                                    className="GameContainer__progress"
+                                                    percent={this.game.progressPercent}
+                                                    content={`${this.game.secondsLeft}s`}
+                                                    active
+                                                    color={
+                                                        this.game.currentUserId === this.game.users.ownUser.id
+                                                            ? "blue"
+                                                            : undefined
+                                                    }
+                                                    error={
+                                                        this.game.currentUserId === this.game.users.ownUser.id &&
+                                                        this.game.progressPercent > 80
+                                                    }
+                                                />
+                                            )}
                                         </Segment>
                                     </div>
                                     <div className="GameContainer__scoreboardContainer">

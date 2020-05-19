@@ -76,13 +76,14 @@ export class PageMainMenu extends React.Component<RouteProps<{}>> {
                                 </Form.Field>
                                 <Link to={routeGame.path(LobbyMode.CLIENT, this.otherId)}>
                                     <Form.Button
+                                        icon="sign-in"
+                                        labelPosition="left"
                                         className="PageMainMenu__button"
                                         disabled={!this.nameValid}
                                         primary
                                         fluid
-                                    >
-                                        Join
-                                    </Form.Button>
+                                        content="Join"
+                                    />
                                 </Link>
                             </>
                         )}
@@ -90,14 +91,13 @@ export class PageMainMenu extends React.Component<RouteProps<{}>> {
                             <Link to={routeGame.path(LobbyMode.HOST)}>
                                 <Form.Button
                                     icon="chess king"
-                                    // labelPosition="left"
+                                    labelPosition="left"
                                     primary
                                     className="PageMainMenu__button"
                                     disabled={!this.nameValid}
                                     fluid
-                                >
-                                    Host
-                                </Form.Button>
+                                    content="Host"
+                                />
                             </Link>
                         )}
                     </Form>

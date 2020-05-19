@@ -39,9 +39,9 @@ export class Background extends React.Component<BackgroundProps> {
 
     public render(): JSX.Element {
         const grids: JSX.Element[] = [];
-        for (let x = 0; x < 4; ++x) {
+        for (let grid = 0; grid < 4; ++grid) {
             grids.push(
-                <div className="Background__cells">
+                <div key={grid} className="Background__cells">
                     {data.map((mode, index) => (
                         <GameCell className="Background__cell" key={index} grayscale cellMode={mode} />
                     ))}

@@ -1,4 +1,5 @@
 import { create as randomSeed } from "random-seed";
+import { subSeconds, addSeconds, isThisQuarter, differenceInSeconds, isAfter } from "date-fns";
 import { computed, action, observable } from "mobx";
 import { Peer, Host, Client } from "../networking";
 import {
@@ -45,6 +46,15 @@ export class Game {
     @observable public stands = new Map<string, Stand>();
 
     @observable public lettersToExchange: CellPositionStand[] | undefined;
+    @observable public times:
+        | {
+              deadline: Date;
+              now: Date;
+              fromTurn: number;
+          }
+        | undefined;
+
+    private interval: ReturnType<typeof setInterval> | undefined;
 
     @computed public get scoreList(): Score[] {
         return Array.from(this.scores.entries())
@@ -182,6 +192,24 @@ export class Game {
         return valid.reason;
     }
 
+    @computed public get secondsLeft(): number {
+        if (!this.times) {
+            return 0;
+        }
+        return differenceInSeconds(this.times.deadline, this.times.now);
+    }
+
+    @computed public get progressPercent(): number {
+        if (!this.config.timeLimit) {
+            return 0;
+        }
+        return 100 - (this.secondsLeft / this.config.timeLimit) * 100;
+    }
+
+    @computed public get showProgress(): boolean {
+        return Boolean(this.config.timeLimit);
+    }
+
     public getCellTurn(position: CellPosition): number | undefined {
         switch (position.positionType) {
             case CellPositionType.BOARD: {
@@ -223,7 +251,38 @@ export class Game {
         this.peer?.sendEndTurn();
     }
 
+    @action.bound private startTurn(): void {
+        if (this.config.timeLimit) {
+            const now = new Date();
+            const deadline = addSeconds(now, this.config.timeLimit);
+            this.times = { now, deadline, fromTurn: this.turn };
+        }
+    }
+
+    @action.bound private nextTurn(): void {
+        this.turn++;
+        this.startTurn();
+    }
+
     @action.bound public async initialize(networkId?: string): Promise<void> {
+        this.interval = setInterval(
+            action(() => {
+                if (!this.times || this.times.fromTurn !== this.turn) {
+                    return;
+                }
+                if (isAfter(this.times.now!, this.times.deadline!)) {
+                    if (this.currentUserId === this.users.ownUser.id) {
+                        this.times = undefined;
+                        this.startPassing();
+                        this.confirmPassing();
+                    }
+                } else {
+                    this.times.now = new Date();
+                }
+            }),
+            500,
+        );
+
         const Ctor = typeof networkId === "string" ? Client : Host;
         this.peer = new Ctor(this.users);
 
@@ -257,6 +316,7 @@ export class Game {
                     this.stands.set(id, stand);
                 });
                 this.turn = 0;
+                this.startTurn();
             }),
         );
         this.peer.onCellMove(
@@ -303,8 +363,7 @@ export class Game {
                 this.abortPassing();
                 const newLetters = this.letterBag.takeMany(this.currentStand.missingLetterCount);
                 this.currentStand.add(...newLetters);
-
-                this.turn++;
+                this.nextTurn();
             }),
         );
         this.peer.onPass(
@@ -321,8 +380,7 @@ export class Game {
 
                     stand.set(exchange.index, newLetter);
                 });
-
-                this.turn++;
+                this.nextTurn();
             }),
         );
 
