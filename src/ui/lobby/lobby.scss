@@ -1,7 +1,13 @@
+@import "../../variables.scss";
+
 .Lobby {
     &__idMessage {
         width: 300px;
         cursor: pointer;
+        border-color: color("secondary1", 4) !important;
+        color: color("secondary1", 0) !important;
+        background-color: lighten(color("secondary1", 1), 25%) !important;
+
         p {
             font-size: 2rem !important;
         }
@@ -9,5 +15,11 @@
 
     &__grid {
         width: 300px;
+    }
+
+    &__startButton {
+        > button {
+            @include button(color("primary", 1));
+        }
     }
 }

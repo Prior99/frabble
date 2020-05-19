@@ -111,4 +111,16 @@
             order: 1;
         }
     }
+
+    &__commitButton {
+        @include button(color("primary", 1));
+    }
+
+    &__abortButton {
+        @include button(color("secondary2", 0));
+    }
+
+    &__confirmButton {
+        @include button(color("secondary1", 0));
+    }
 }

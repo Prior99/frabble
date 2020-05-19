@@ -108,10 +108,10 @@ export class GameContainer extends React.Component<GameContainerProps> {
                                                             disabled={!this.canEndTurn}
                                                             icon="thumbs up"
                                                             labelPosition="left"
-                                                            primary
                                                             size="big"
                                                             content="End turn"
                                                             onClick={this.handleCommit}
+                                                            primary
                                                             className="GameContainer__commitButton"
                                                         />
                                                     </span>
@@ -121,10 +121,12 @@ export class GameContainer extends React.Component<GameContainerProps> {
                                             {this.isPassing ? (
                                                 <Button.Group fluid size="big">
                                                     <Button
-                                                        content="Confirm"
+                                                        content="Okay"
                                                         icon="check"
                                                         labelPosition="left"
                                                         positive
+                                                        className="GameContainer__confirmButton"
+                                                        primary
                                                         onClick={this.confirmPassing}
                                                     />
                                                     <Button.Or />
@@ -132,7 +134,8 @@ export class GameContainer extends React.Component<GameContainerProps> {
                                                         content="Abort"
                                                         icon="cancel"
                                                         labelPosition="right"
-                                                        negative
+                                                        className="GameContainer__abortButton"
+                                                        primary
                                                         onClick={this.abortPassing}
                                                     />
                                                 </Button.Group>
@@ -145,7 +148,7 @@ export class GameContainer extends React.Component<GameContainerProps> {
                                                     size="big"
                                                     content="Pass"
                                                     onClick={this.startPassing}
-                                                    className="GameContainer__commitButton"
+                                                    className="GameContainer__passButton"
                                                 />
                                             )}
                                         </Segment>

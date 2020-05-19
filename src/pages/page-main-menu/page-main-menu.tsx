@@ -75,7 +75,12 @@ export class PageMainMenu extends React.Component<RouteProps<{}>> {
                                     <Input value={this.otherId} onChange={this.handleOtherIdChange} />
                                 </Form.Field>
                                 <Link to={routeGame.path(LobbyMode.CLIENT, this.otherId)}>
-                                    <Form.Button disabled={!this.nameValid} primary fluid>
+                                    <Form.Button
+                                        className="PageMainMenu__button"
+                                        disabled={!this.nameValid}
+                                        primary
+                                        fluid
+                                    >
                                         Join
                                     </Form.Button>
                                 </Link>
@@ -83,7 +88,14 @@ export class PageMainMenu extends React.Component<RouteProps<{}>> {
                         )}
                         {this.activeTab === 1 && (
                             <Link to={routeGame.path(LobbyMode.HOST)}>
-                                <Form.Button disabled={!this.nameValid} primary fluid>
+                                <Form.Button
+                                    icon="chess king"
+                                    // labelPosition="left"
+                                    primary
+                                    className="PageMainMenu__button"
+                                    disabled={!this.nameValid}
+                                    fluid
+                                >
                                     Host
                                 </Form.Button>
                             </Link>

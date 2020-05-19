@@ -139,7 +139,14 @@ export class Lobby extends React.Component<LobbyProps> {
                                                 <label>Time limit (seconds)</label>
                                                 <Input value={this.timeLimit} onChange={this.handleTimeLimitChange} />
                                             </Form.Field>
-                                            <Form.Button primary fluid onClick={this.handleStartClick}>
+                                            <Form.Button
+                                                icon="play circle"
+                                                labelPosition="left"
+                                                primary
+                                                fluid
+                                                className="Lobby__startButton"
+                                                onClick={this.handleStartClick}
+                                            >
                                                 Start
                                             </Form.Button>
                                         </Form>
@@ -156,10 +163,10 @@ export class Lobby extends React.Component<LobbyProps> {
                         <Grid.Column>
                             <Popup
                                 on="click"
+                                inverted
                                 trigger={
                                     <Message
                                         icon="globe"
-                                        color="blue"
                                         onClick={this.handleIdClick}
                                         content={this.game.peer?.networkId}
                                         className="Lobby__idMessage"

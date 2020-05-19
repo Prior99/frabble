@@ -40,3 +40,7 @@ $white: lighten(color("secondary3", 1), 40%);
 $bold: 600;
 
 $gutter: 20px;
+
+@mixin button($color) {
+    background-color: lighten($color, 10%) !important;
+}

@@ -15,4 +15,9 @@
         font-weight: normal;
         margin-left: 1em;
     }
+
+    &__label.ui.blue.ribbon.label {
+        background-color: lighten(color("primary", 1), 10%) !important;
+        border-color: lighten(color("primary", 1), 0%) !important;
+    }
 }

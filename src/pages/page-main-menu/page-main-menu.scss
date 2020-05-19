@@ -48,4 +48,10 @@
         padding-right: 1em;
         font-style: italic;
     }
+
+    &__button {
+        > button {
+            @include button(color("primary", 1));
+        }
+    }
 }
