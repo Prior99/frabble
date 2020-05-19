@@ -2,3 +2,4 @@ node_modules
 *.log
 *.kra~
 coverage
+dist/
