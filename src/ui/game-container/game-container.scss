@@ -4,6 +4,7 @@
     display: flex;
     box-sizing: border-box;
     padding: $gutter / 2;
+    justify-content: center;
 
     @media (orientation: landscape) {
         flex-direction: row;
@@ -53,12 +54,13 @@
 
         @media (orientation: landscape) {
             padding-left: $gutter;
+            padding-top: $gutter;
             max-width: 350px;
         }
 
         @media (orientation: portrait) {
             margin-top: $gutter;
-            padding: $gutter / 2;
+            padding: $gutter / 2 0;
         }
     }
 

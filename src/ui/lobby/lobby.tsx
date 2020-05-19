@@ -104,36 +104,14 @@ export class Lobby extends React.Component<LobbyProps> {
     public render(): JSX.Element {
         return (
             <MenuContainer className={this.props.className}>
-                <Grid>
-                    <Grid.Row>
-                        <Grid.Column>
-                            <Popup
-                                on="click"
-                                trigger={
-                                    <Message
-                                        icon="globe"
-                                        color="blue"
-                                        onClick={this.handleIdClick}
-                                        content={this.game.peer?.networkId}
-                                        className="Lobby__idMessage"
-                                    />
-                                }
-                                content={this.popupText}
-                            />
-                        </Grid.Column>
-                    </Grid.Row>
+                <Grid className="Lobby__grid">
                     <Grid.Row>
                         <Grid.Column>
                             <Segment>
-                                <h1>Lobby</h1>
                                 <h2>Players</h2>
-                                <List>
+                                <List as="ul">
                                     {this.game.users.all.map(({ id, name }) => (
-                                        <List.Item
-                                            key={id}
-                                            content={name}
-                                            icon={id === this.game.users.ownUser.id ? "circle" : "circle outline"}
-                                        />
+                                        <List.Item as="li" key={id} content={name} />
                                     ))}
                                 </List>
                                 {this.isHost ? (
@@ -172,6 +150,23 @@ export class Lobby extends React.Component<LobbyProps> {
                                     </p>
                                 )}
                             </Segment>
+                        </Grid.Column>
+                    </Grid.Row>
+                    <Grid.Row>
+                        <Grid.Column>
+                            <Popup
+                                on="click"
+                                trigger={
+                                    <Message
+                                        icon="globe"
+                                        color="blue"
+                                        onClick={this.handleIdClick}
+                                        content={this.game.peer?.networkId}
+                                        className="Lobby__idMessage"
+                                    />
+                                }
+                                content={this.popupText}
+                            />
                         </Grid.Column>
                     </Grid.Row>
                 </Grid>

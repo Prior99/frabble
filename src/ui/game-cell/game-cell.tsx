@@ -13,6 +13,7 @@ export interface BaseGameCellProps {
     className?: string;
     onClick?: React.MouseEventHandler;
     hovered?: boolean;
+    grayscale?: boolean;
 }
 
 export interface GameCellProps extends BaseGameCellProps {
@@ -53,6 +54,7 @@ export class GameCell extends React.Component<GameCellProps> {
                 "GameCell--empty": this.empty,
                 "GameCell--content": !this.empty,
                 "GameCell--hovering": this.props.hovered,
+                "GameCell--grayscale": this.props.grayscale,
             },
             `GameCell--${cellMode}`,
             this.props.className,

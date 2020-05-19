@@ -49,9 +49,12 @@ export class PageMainMenu extends React.Component<RouteProps<{}>> {
 
     public render(): JSX.Element {
         return (
-            <MenuContainer>
-                <Segment>
-                    <h1>Connect</h1>
+            <MenuContainer className="PageMainMenu">
+                <div className="PageMainMenu__header">
+                    <div className="PageMainMenu__logo" />
+                    <h1 className="PageMainMenu__name">Frabble</h1>
+                </div>
+                <Segment className="PageMainMenu__segment">
                     <Form>
                         <Form.Field error={!this.nameValid}>
                             <label>Change name</label>

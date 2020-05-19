@@ -6,20 +6,26 @@ import "semantic-ui-css-offline/semantic.min.css";
 import "./factories";
 import { getRoutes } from "./routing";
 import { routeMainMenu } from "./pages";
-import "./main.scss";
+import "./app.scss";
+import { Background } from "./ui/background/background";
 
 // Start dependency injection.
 const tsdi = new TSDI();
 tsdi.enableComponentScanner();
 
 ReactDOM.render(
-    <Router history={tsdi.get("history")}>
-        <Switch>
-            <Redirect exact from="/" to={routeMainMenu.path()} />
-            {getRoutes().map((route, index) => (
-                <Route path={route.pattern} component={route.component} key={index} />
-            ))}
-        </Switch>
-    </Router>,
+    <div className="App">
+        <Background className="App__background" />
+        <div className="App__main">
+            <Router history={tsdi.get("history")}>
+                <Switch>
+                    <Redirect exact from="/" to={routeMainMenu.path()} />
+                    {getRoutes().map((route, index) => (
+                        <Route path={route.pattern} component={route.component} key={index} />
+                    ))}
+                </Switch>
+            </Router>
+        </div>
+    </div>,
     document.getElementById("app"),
 );

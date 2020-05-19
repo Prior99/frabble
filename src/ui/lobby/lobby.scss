@@ -1,8 +1,13 @@
 .Lobby {
     &__idMessage {
+        width: 300px;
         cursor: pointer;
         p {
             font-size: 2rem !important;
         }
+    }
+
+    &__grid {
+        width: 300px;
     }
 }

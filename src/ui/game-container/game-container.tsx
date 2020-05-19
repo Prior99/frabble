@@ -85,67 +85,73 @@ export class GameContainer extends React.Component<GameContainerProps> {
                             <div className="GameContainer__sidebar">
                                 <div className="GameContainer__statusContainer">
                                     <h2>Status</h2>
-                                    <Status className="GameContainer__status" />
+                                    <Segment className="GameContainer__sidebarSegment">
+                                        <Status className="GameContainer__status" />
+                                    </Segment>
                                 </div>
                                 <div className="GameContainer__scoreboardContainer">
                                     <h2>Scoreboard</h2>
-                                    <Scoreboard className="GameContainer__scoreboard" />
+                                    <Segment className="GameContainer__sidebarSegment">
+                                        <Scoreboard className="GameContainer__scoreboard" />
+                                    </Segment>
                                 </div>
                                 <div className="GameContainer__actions">
                                     <h2>Actions</h2>
-                                    <Popup
-                                        header="Cannot end turn"
-                                        content={this.buttonPopupContent}
-                                        disabled={this.canEndTurn}
-                                        inverted
-                                        trigger={
-                                            <span>
-                                                <Button
-                                                    fluid
-                                                    disabled={!this.canEndTurn}
-                                                    icon="play"
-                                                    labelPosition="left"
-                                                    primary
-                                                    size="big"
-                                                    content="End turn"
-                                                    onClick={this.handleCommit}
-                                                    className="GameContainer__commitButton"
-                                                />
-                                            </span>
-                                        }
-                                    />
-                                    <p />
-                                    {this.isPassing ? (
-                                        <Button.Group fluid size="big">
-                                            <Button
-                                                content="Confirm"
-                                                icon="check"
-                                                labelPosition="left"
-                                                positive
-                                                onClick={this.confirmPassing}
-                                            />
-                                            <Button.Or />
-                                            <Button
-                                                content="Abort"
-                                                icon="cancel"
-                                                labelPosition="right"
-                                                negative
-                                                onClick={this.abortPassing}
-                                            />
-                                        </Button.Group>
-                                    ) : (
-                                        <Button
-                                            fluid
-                                            disabled={!this.canPass}
-                                            icon="play"
-                                            labelPosition="left"
-                                            primary
-                                            size="big"
-                                            content="Pass"
-                                            onClick={this.startPassing}
-                                            className="GameContainer__commitButton"
+                                    <Segment className="GameContainer__sidebarSegment">
+                                        <Popup
+                                            header="Cannot end turn"
+                                            content={this.buttonPopupContent}
+                                            disabled={this.canEndTurn}
+                                            inverted
+                                            trigger={
+                                                <span>
+                                                    <Button
+                                                        fluid
+                                                        disabled={!this.canEndTurn}
+                                                        icon="play"
+                                                        labelPosition="left"
+                                                        primary
+                                                        size="big"
+                                                        content="End turn"
+                                                        onClick={this.handleCommit}
+                                                        className="GameContainer__commitButton"
+                                                    />
+                                                </span>
+                                            }
                                         />
-                                    )}
+                                        <p />
+                                        {this.isPassing ? (
+                                            <Button.Group fluid size="big">
+                                                <Button
+                                                    content="Confirm"
+                                                    icon="check"
+                                                    labelPosition="left"
+                                                    positive
+                                                    onClick={this.confirmPassing}
+                                                />
+                                                <Button.Or />
+                                                <Button
+                                                    content="Abort"
+                                                    icon="cancel"
+                                                    labelPosition="right"
+                                                    negative
+                                                    onClick={this.abortPassing}
+                                                />
+                                            </Button.Group>
+                                        ) : (
+                                            <Button
+                                                fluid
+                                                disabled={!this.canPass}
+                                                icon="play"
+                                                labelPosition="left"
+                                                primary
+                                                size="big"
+                                                content="Pass"
+                                                onClick={this.startPassing}
+                                                className="GameContainer__commitButton"
+                                            />
+                                        )}
+                                    </Segment>
                                 </div>
                             </div>
                         </div>
