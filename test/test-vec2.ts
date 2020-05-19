@@ -1,4 +1,4 @@
-import { vec2, Vec2 } from "../src";
+import { vec2, Vec2 } from "../src/utils";
 
 describe("vec2", () => {
     describe("static min", () => {

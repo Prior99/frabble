@@ -5,6 +5,7 @@
     "scripts": {
         "build": "webpack",
         "start": "webpack-dev-server",
+        "test": "jest",
         "lint": "eslint --max-warnings 0 src/**/*.ts src/**/*.tsx test/**/*.ts*"
     },
     "license": "MIT",
@@ -73,6 +74,7 @@
     },
     "devDependencies": {
         "@types/classnames": "^2.2.10",
+        "@types/jest": "^25.2.3",
         "@types/peerjs": "^1.1.0",
         "@types/ramda": "^0.27.5",
         "@types/random-seed": "^0.3.3",
@@ -92,15 +94,44 @@
         "eslint-plugin-react": "^7.20.0",
         "file-loader": "^6.0.0",
         "git-revision-webpack-plugin": "^3.0.6",
+        "jest": "^26.0.1",
         "node-sass": "^4.14.1",
         "prettier": "^2.0.5",
         "resolve-url-loader": "^3.1.1",
         "sass-loader": "^8.0.2",
         "style-loader": "^1.2.1",
+        "ts-jest": "^26.0.0",
         "ts-loader": "^7.0.4",
         "typescript": "^3.9.2",
         "webpack": "^4.43.0",
         "webpack-cli": "^3.3.11",
         "webpack-dev-server": "^3.11.0"
+    },
+    "jest": {
+        "collectCoverage": true,
+        "moduleFileExtensions": [
+            "ts",
+            "js"
+        ],
+        "preset": "ts-jest",
+        "transform": {
+            "\\.ts$": "ts-jest"
+        },
+        "coverageReporters": [
+            "lcov",
+            "json",
+            "text"
+        ],
+        "testMatch": [
+            "<rootDir>/test/**/test-*.ts"
+        ],
+        "coveragePathIgnorePatterns": [
+            "/node_modules/",
+            "/test/"
+        ],
+        "collectCoverageFrom": [
+            "<rootDir>/src/**/*.ts",
+            "<rootDir>/src/**/*.tsx"
+        ]
     }
 }
