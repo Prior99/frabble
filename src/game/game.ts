@@ -269,7 +269,7 @@ export class Game {
 
     @computed public get isGameOver(): boolean {
         const hasEmptyStand = Array.from(this.stands.values()).some((stand) => stand.isEmpty);
-        if (this.letterBag.isEmpty && hasEmptyStand) {
+        if (this.letterBag.isEmpty && hasEmptyStand && this.board.getLettersForTurn(this.turn).length === 0) {
             return true;
         }
         if (this.turn < this.users.count * 2 - 1) {
