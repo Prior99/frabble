@@ -40,4 +40,12 @@
         margin-top: $gutter / 4;
         width: 300px;
     }
+
+    &__version {
+        opacity: 0.5;
+        width: 300px;
+        text-align: right;
+        padding-right: 1em;
+        font-style: italic;
+    }
 }

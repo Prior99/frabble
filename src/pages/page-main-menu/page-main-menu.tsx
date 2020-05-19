@@ -12,6 +12,8 @@ import "./page-main-menu.scss";
 import { MenuContainer } from "../../ui";
 import { Game } from "../../game";
 
+declare const SOFTWARE_VERSION: string;
+
 @external
 @observer
 export class PageMainMenu extends React.Component<RouteProps<{}>> {
@@ -88,6 +90,7 @@ export class PageMainMenu extends React.Component<RouteProps<{}>> {
                         )}
                     </Form>
                 </Segment>
+                <div className="PageMainMenu__version">{`Version #${SOFTWARE_VERSION}`}</div>
             </MenuContainer>
         );
     }
