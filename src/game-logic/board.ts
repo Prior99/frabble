@@ -3,7 +3,6 @@ import { Vec2, vec2, rect, RectIteratorOrder } from "../utils";
 import { observable, action, computed } from "mobx";
 import { uniq, symmetricDifferenceWith } from "ramda";
 import { getPointsForLetter } from "./letters";
-import { Stand } from "./stand";
 
 export type ValidityResult =
     | {
@@ -30,7 +29,7 @@ export interface Word {
     multiplier: number;
 }
 
-export function wordsEqual(a: Word, b: Word) {
+export function wordsEqual(a: Word, b: Word): boolean {
     return symmetricDifferenceWith((pos1, pos2) => pos1.equals(pos2), a.positions, b.positions).length === 0;
 }
 
@@ -65,7 +64,7 @@ export class Board {
         };
     }
 
-    @action.bound public initialize() {
+    @action.bound public initialize(): void {
         this.cells = this.cells.fill({ empty: true });
     }
 

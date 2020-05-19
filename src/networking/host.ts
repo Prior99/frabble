@@ -78,7 +78,7 @@ export class Host extends Peer {
         });
     }
 
-    @bind protected sendToUser(userId: string, message: HostMessage) {
+    @bind protected sendToUser(userId: string, message: HostMessage): void {
         if (userId === this.remoteUsers.ownUser.id) {
             this.handleHostMessage(message);
             return;
@@ -90,28 +90,28 @@ export class Host extends Peer {
         this.sendToPeer(connection, message);
     }
 
-    @bind public sendWelcome(users: RemoteUser[]) {
+    @bind public sendWelcome(users: RemoteUser[]): void {
         this.broadcastMessage({
             message: HostMessageType.WELCOME,
             users,
         });
     }
 
-    @bind public sendUserConnected(user: RemoteUser) {
+    @bind public sendUserConnected(user: RemoteUser): void {
         this.broadcastMessage({
             message: HostMessageType.USER_CONNECTED,
             user,
         });
     }
 
-    @bind public sendUserDisconnected(userId: string) {
+    @bind public sendUserDisconnected(userId: string): void {
         this.broadcastMessage({
             message: HostMessageType.USER_DISCONNECTED,
             userId,
         });
     }
 
-    @bind public sendGameStart(config: GameConfig) {
+    @bind public sendGameStart(config: GameConfig): void {
         this.broadcastMessage({
             message: HostMessageType.GAME_START,
             config,

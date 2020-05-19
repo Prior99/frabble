@@ -1,5 +1,4 @@
 import { RemoteUser } from "./remote-user";
-import { Letter } from "../types";
 import { SerializedCellPosition } from "../utils";
 
 export enum ClientMessageType {

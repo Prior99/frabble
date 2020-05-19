@@ -41,7 +41,7 @@ export class RemoteUsers {
         return this.users.get(id);
     }
 
-    @action.bound public setOwnUser(user: RemoteUser) {
+    @action.bound public setOwnUser(user: RemoteUser): void {
         this.users.set(this.ownId, user);
     }
 }

@@ -12,18 +12,16 @@ import {
     BaseClientMessage,
     CellMoveInfo,
     CellPosition,
-    Letter,
     CellPositionStand,
 } from "../types";
 import { observable } from "mobx";
-import { Vec2, vec2, invariant, serializeCellPosition, deserializeCellPosition } from "../utils";
+import { invariant, serializeCellPosition, deserializeCellPosition } from "../utils";
 import { RemoteUsers } from "../game";
 
 export abstract class Peer extends EventEmitter {
     protected peer?: PeerJS;
     @observable public peerId = v4();
     @observable public networkId: string | undefined = undefined;
-
 
     constructor(protected remoteUsers: RemoteUsers) {
         super();
@@ -39,7 +37,7 @@ export abstract class Peer extends EventEmitter {
 
     protected abstract sendClientMessage(message: ClientMessage): void;
 
-    @bind protected handleHostMessage(message: HostMessage) {
+    @bind protected handleHostMessage(message: HostMessage): void {
         console.info(`Received host message:`, message);
         switch (message.message) {
             case HostMessageType.WELCOME:
@@ -50,7 +48,7 @@ export abstract class Peer extends EventEmitter {
                 return this.emit(this.onUserDisconnected, message.userId);
             case HostMessageType.GAME_START:
                 return this.emit(this.onGameStart, message.config);
-            case HostMessageType.RELAYED_CLIENT_MESSAGE:
+            case HostMessageType.RELAYED_CLIENT_MESSAGE: {
                 const { clientMessage } = message;
                 switch (clientMessage.message) {
                     case ClientMessageType.CELL_MOVE:
@@ -65,8 +63,10 @@ export abstract class Peer extends EventEmitter {
                         return this.emit(this.onEndTurn);
                     case ClientMessageType.HELLO:
                         throw new Error("Hello message must not be relayed.");
-                    default: invariant(clientMessage);
+                    default:
+                        invariant(clientMessage);
                 }
+            }
         }
     }
 
@@ -78,14 +78,14 @@ export abstract class Peer extends EventEmitter {
     }
 
     @bind protected async open(): Promise<string> {
-        await new Promise(resolve => {
+        await new Promise((resolve) => {
             this.peer = new PeerJS(null as any); // eslint-disable-line
             this.peer.on("open", () => resolve());
         });
         if (!this.peer) {
             throw new Error("Connection id could not be determined.");
         }
-        console.info(`Connection open. Peer id is ${this.peer.id}.`)
+        console.info(`Connection open. Peer id is ${this.peer.id}.`);
         return this.peer.id;
     }
 

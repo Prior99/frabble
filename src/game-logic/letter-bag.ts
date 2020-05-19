@@ -8,7 +8,7 @@ export class LetterBag {
     @observable private letters: Letter[] = [];
     private rng?: RandomSeed;
 
-    public initialize(seed: string) {
+    public initialize(seed: string): void {
         this.rng = randomSeed(seed);
         for (const letter of allLetters()) {
             for (let i = 0; i < getLetterOccurence(letter); ++i) {
@@ -18,7 +18,7 @@ export class LetterBag {
         this.shuffle();
     }
 
-    @action.bound private shuffle() {
+    @action.bound private shuffle(): void {
         const { rng } = this;
         if (!rng) {
             throw new Error("Letter bag was not initialized.");
@@ -34,7 +34,7 @@ export class LetterBag {
         return letter;
     }
 
-    @computed public get count() {
+    @computed public get count(): number {
         return this.letters.length;
     }
 

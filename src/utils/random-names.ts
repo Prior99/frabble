@@ -3,7 +3,7 @@ import * as rand from "random-seed";
 const consonants = ["B", "C", "D", "F", "G", "H", "I", "J", "K", "L", "M", "N", "P", "Q", "R", "S", "T", "W", "Z"]; // eslint-disable-line
 const vowels = ["A", "E", "I", "O", "U"]; // eslint-disable-line
 
-function possibleCharacter(lastCharacter: string) {
+function possibleCharacter(lastCharacter: string): string[] {
     switch (lastCharacter) {
         case "A": return [ ...consonants, "U" ];
         case "B": return [ "R", "L", ...vowels ];
@@ -37,14 +37,6 @@ function possibleCharacter(lastCharacter: string) {
 
 const familyNameSuffix = ["tor", "tel", "ker", "ler", "ke", "ger", "mann", "lich"];
 
-function generateFamilyName(r = rand.create()): string {
-    let lastName = generateFirstName("", r);
-    if (vowels.includes(lastName.toUpperCase()[lastName.length - 1])) {
-        lastName = `${lastName}${familyNameSuffix[r(familyNameSuffix.length)]}`;
-    }
-    return lastName;
-}
-
 function generateFirstName(name = "", r = rand.create()): string {
     if (name.length === 0) {
         return generateFirstName(consonants[r(consonants.length)], r);
@@ -62,6 +54,14 @@ function generateFirstName(name = "", r = rand.create()): string {
     if (newCharacter === "O" && r(10) < 1) { newCharacter = "Ö"; }
     if (newCharacter === "U" && r(10) < 1) { newCharacter = "Ü"; }
     return generateFirstName(`${name}${newCharacter.toLowerCase()}`);
+}
+
+function generateFamilyName(r = rand.create()): string {
+    let lastName = generateFirstName("", r);
+    if (vowels.includes(lastName.toUpperCase()[lastName.length - 1])) {
+        lastName = `${lastName}${familyNameSuffix[r(familyNameSuffix.length)]}`;
+    }
+    return lastName;
 }
 
 export function generateUserName(): string {

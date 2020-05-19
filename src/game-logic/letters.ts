@@ -36,7 +36,7 @@ export function allLetters(): Letter[] {
 
 }
 
-export function getPointsForLetter(letter: Letter) {
+export function getPointsForLetter(letter: Letter): number {
     switch (letter) {
         case Letter.A:
         case Letter.D:
@@ -79,7 +79,7 @@ export function getPointsForLetter(letter: Letter) {
     }
 }
 
-export function getLetterOccurence(letter: Letter) {
+export function getLetterOccurence(letter: Letter): number {
     switch (letter) {
         case Letter.A: return 5;
         case Letter.B: return 2;

@@ -1,7 +1,7 @@
 import PeerJS from "peerjs";
 import { Peer } from "./peer";
 import { bind } from "bind-decorator";
-import { ClientMessage, RemoteUser } from "../types";
+import { ClientMessage } from "../types";
 import { RemoteUsers } from "../game";
 
 export class Client extends Peer {

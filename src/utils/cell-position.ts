@@ -2,14 +2,16 @@ import { CellPosition, CellPositionType, CellPositionStand, CellPositionBoard } 
 import { invariant } from "./invariant";
 import { vec2 } from "./vec2";
 
-export type SerializedCellPosition = {
-    positionType: CellPositionType.STAND;
-    playerId: string;
-    index: number;
-} | {
-    positionType: CellPositionType.BOARD;
-    position: [number, number];
-}
+export type SerializedCellPosition =
+    | {
+          positionType: CellPositionType.STAND;
+          playerId: string;
+          index: number;
+      }
+    | {
+          positionType: CellPositionType.BOARD;
+          position: [number, number];
+      };
 
 export function serializeCellPosition(position: CellPosition): SerializedCellPosition {
     switch (position.positionType) {
@@ -24,7 +26,8 @@ export function serializeCellPosition(position: CellPosition): SerializedCellPos
                 index: position.index,
                 playerId: position.playerId,
             };
-        default: invariant(position);
+        default:
+            invariant(position);
     }
 }
 
@@ -41,7 +44,8 @@ export function deserializeCellPosition(position: SerializedCellPosition): CellP
                 index: position.index,
                 playerId: position.playerId,
             };
-        default: invariant(position);
+        default:
+            invariant(position);
     }
 }
 
@@ -49,14 +53,17 @@ export function cellPositionEquals(a: CellPosition, b: CellPosition): boolean {
     if (a.positionType !== b.positionType) {
         return false;
     }
-    
-    switch(a.positionType) {
-        case CellPositionType.STAND:
+
+    switch (a.positionType) {
+        case CellPositionType.STAND: {
             const bStand = b as CellPositionStand;
             return a.index === bStand.index && a.playerId === bStand.playerId;
-        case CellPositionType.BOARD: 
+        }
+        case CellPositionType.BOARD: {
             const bBoard = b as CellPositionBoard;
             return a.position.equals(bBoard.position);
-        default: invariant(a);
+        }
+        default:
+            invariant(a);
     }
 }

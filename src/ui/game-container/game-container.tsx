@@ -93,47 +93,59 @@ export class GameContainer extends React.Component<GameContainerProps> {
                                 </div>
                                 <div className="GameContainer__actions">
                                     <h2>Actions</h2>
-                                        <Popup
-                                            header="Cannot end turn"
-                                            content={this.buttonPopupContent}
-                                            disabled={this.canEndTurn}
-                                            inverted
-                                            trigger={
-                                                <span>
-                                                    <Button
-                                            fluid
-                                                        disabled={!this.canEndTurn}
-                                                        icon="play"
-                                                        labelPosition="left"
-                                                        primary
-                                                        size="big"
-                                                        content="End turn"
-                                                        onClick={this.handleCommit}
-                                                        className="GameContainer__commitButton"
-                                                    />
-                                                </span>
-                                            }
-                                        />
-                                        <p />
-                                        {this.isPassing ? (
-                                            <Button.Group fluid size="big">
-                                                <Button content="Confirm" icon="check" labelPosition="left" positive onClick={this.confirmPassing} />
-                                                <Button.Or />
-                                                <Button content="Abort" icon="cancel" labelPosition="right" negative onClick={this.abortPassing} />
-                                            </Button.Group>
-                                        ) : (
+                                    <Popup
+                                        header="Cannot end turn"
+                                        content={this.buttonPopupContent}
+                                        disabled={this.canEndTurn}
+                                        inverted
+                                        trigger={
+                                            <span>
+                                                <Button
+                                                    fluid
+                                                    disabled={!this.canEndTurn}
+                                                    icon="play"
+                                                    labelPosition="left"
+                                                    primary
+                                                    size="big"
+                                                    content="End turn"
+                                                    onClick={this.handleCommit}
+                                                    className="GameContainer__commitButton"
+                                                />
+                                            </span>
+                                        }
+                                    />
+                                    <p />
+                                    {this.isPassing ? (
+                                        <Button.Group fluid size="big">
                                             <Button
-                                            fluid
-                                                disabled={!this.canPass}
-                                                icon="play"
+                                                content="Confirm"
+                                                icon="check"
                                                 labelPosition="left"
-                                                primary
-                                                size="big"
-                                                content="Pass"
-                                                onClick={this.startPassing}
-                                                className="GameContainer__commitButton"
+                                                positive
+                                                onClick={this.confirmPassing}
                                             />
-                                        )}
+                                            <Button.Or />
+                                            <Button
+                                                content="Abort"
+                                                icon="cancel"
+                                                labelPosition="right"
+                                                negative
+                                                onClick={this.abortPassing}
+                                            />
+                                        </Button.Group>
+                                    ) : (
+                                        <Button
+                                            fluid
+                                            disabled={!this.canPass}
+                                            icon="play"
+                                            labelPosition="left"
+                                            primary
+                                            size="big"
+                                            content="Pass"
+                                            onClick={this.startPassing}
+                                            className="GameContainer__commitButton"
+                                        />
+                                    )}
                                 </div>
                             </div>
                         </div>

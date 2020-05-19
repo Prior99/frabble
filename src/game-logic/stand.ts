@@ -1,6 +1,5 @@
 import { observable, action, computed } from "mobx";
 import { Letter } from "../types";
-import { insert } from "ramda";
 
 export class Stand {
     public static readonly MAX_LETTERS = 7;
@@ -16,11 +15,11 @@ export class Stand {
         return Array.from(this.letters.values()).filter(value => value !== undefined).length;
     }
 
-    @computed public get missingLetterCount() {
+    @computed public get missingLetterCount(): number {
         return Stand.MAX_LETTERS - this.count;
     }
 
-    @action.bound public add(...letters: Letter[]) {
+    @action.bound public add(...letters: Letter[]): void {
         for (const letter of letters) {
             for (let index = 0; ; ++index) {
                 if (this.at(index) === undefined) {
@@ -31,7 +30,7 @@ export class Stand {
         }
     }
 
-    @action.bound public set(index: number, letter: Letter) {
+    @action.bound public set(index: number, letter: Letter): void {
         this.letters.set(index, letter);
     }
 

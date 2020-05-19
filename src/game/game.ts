@@ -1,7 +1,16 @@
-import { create as randomSeed, RandomSeed } from "random-seed";
+import { create as randomSeed } from "random-seed";
 import { computed, action, observable } from "mobx";
 import { Peer, Host, Client } from "../networking";
-import { NetworkingMode, GameState, Language, RemoteUser, Letter, CellPosition, CellPositionType, CellPositionStand } from "../types";
+import {
+    NetworkingMode,
+    GameState,
+    Language,
+    RemoteUser,
+    Letter,
+    CellPosition,
+    CellPositionType,
+    CellPositionStand,
+} from "../types";
 import { RemoteUsers } from "./remote-users";
 import { component } from "tsdi";
 import { GameConfig } from "../types";
@@ -53,7 +62,7 @@ export class Game {
         return this.scoreList.find((entry) => entry.playerId === playerId)?.rank ?? 0;
     }
 
-    @computed public get networkMode() {
+    @computed public get networkMode(): NetworkingMode {
         if (!this.peer) {
             return NetworkingMode.DISCONNECTED;
         }
@@ -83,7 +92,7 @@ export class Game {
         return stand;
     }
 
-    @action.bound public startGame() {
+    @action.bound public startGame(): void {
         if (!(this.peer instanceof Host)) {
             throw new Error("Client can't start game.");
         }
@@ -113,11 +122,11 @@ export class Game {
         return this.board.getLettersForTurn(this.turn).length === 0;
     }
 
-    @action.bound public startPassing() {
+    @action.bound public startPassing(): void {
         this.lettersToExchange = [];
     }
 
-    @action.bound public confirmPassing() {
+    @action.bound public confirmPassing(): void {
         if (this.lettersToExchange === undefined) {
             throw new Error("Must start passing before committing.");
         }
@@ -126,28 +135,28 @@ export class Game {
         this.lettersToExchange = undefined;
     }
 
-    @action.bound public abortPassing() {
+    @action.bound public abortPassing(): void {
         this.lettersToExchange = undefined;
     }
 
-    @action.bound public markLetterForExchange(letterCell: CellPositionStand) {
+    @action.bound public markLetterForExchange(letterCell: CellPositionStand): void {
         if (this.lettersToExchange === undefined) {
             throw new Error("Must start passing before marking a letter.");
         }
 
-        if (this.lettersToExchange.some(exchange => cellPositionEquals(exchange, letterCell))) {
+        if (this.lettersToExchange.some((exchange) => cellPositionEquals(exchange, letterCell))) {
             throw new Error("Letter already marked.");
         }
 
         this.lettersToExchange.push(letterCell);
     }
 
-    @action.bound public unmarkLetterForExchange(letterCell: CellPositionStand) {
+    @action.bound public unmarkLetterForExchange(letterCell: CellPositionStand): void {
         if (this.lettersToExchange === undefined) {
             throw new Error("Must start passing before unmarking a letter.");
         }
 
-        this.lettersToExchange = this.lettersToExchange.filter(exchange => !cellPositionEquals(exchange, letterCell));
+        this.lettersToExchange = this.lettersToExchange.filter((exchange) => !cellPositionEquals(exchange, letterCell));
     }
 
     @computed public get isPassing(): boolean {
@@ -167,18 +176,21 @@ export class Game {
             return "It's not your turn.";
         }
         const valid = this.currentTurnValid;
-        if (valid.valid) { return ""; }
+        if (valid.valid) {
+            return "";
+        }
         return valid.reason;
     }
 
     public getCellTurn(position: CellPosition): number | undefined {
         switch (position.positionType) {
-            case CellPositionType.BOARD:
+            case CellPositionType.BOARD: {
                 const cell = this.board.at(position.position);
                 if (cell.empty) {
                     return;
                 }
                 return cell.turn;
+            }
             case CellPositionType.STAND:
                 return;
             default:
@@ -188,24 +200,26 @@ export class Game {
 
     public getLetter(position: CellPosition): Letter | undefined {
         switch (position.positionType) {
-            case CellPositionType.BOARD:
+            case CellPositionType.BOARD: {
                 const cell = this.board.at(position.position);
                 if (cell.empty) {
                     return;
                 }
                 return cell.letter;
-            case CellPositionType.STAND:
+            }
+            case CellPositionType.STAND: {
                 const stand = this.stands.get(position.playerId);
                 if (!stand) {
                     throw new Error(`Couldn't find stand for player ${position.playerId}.`);
                 }
                 return stand.at(position.index);
+            }
             default:
                 invariant(position);
         }
     }
 
-    @action.bound public endTurn() {
+    @action.bound public endTurn(): void {
         this.peer?.sendEndTurn();
     }
 
@@ -252,13 +266,14 @@ export class Game {
                     throw new Error("Cannot move empty cell.");
                 }
                 switch (sourcePosition.positionType) {
-                    case CellPositionType.STAND:
+                    case CellPositionType.STAND: {
                         const stand = this.stands.get(sourcePosition.playerId);
                         if (!stand) {
                             throw new Error(`Couldn't find stand for player ${sourcePosition.playerId}.`);
                         }
                         stand.remove(sourcePosition.index);
                         break;
+                    }
                     case CellPositionType.BOARD:
                         this.board.letterRemove(sourcePosition.position);
                         break;
@@ -266,13 +281,14 @@ export class Game {
                         invariant(sourcePosition);
                 }
                 switch (targetPosition.positionType) {
-                    case CellPositionType.STAND:
+                    case CellPositionType.STAND: {
                         const stand = this.stands.get(targetPosition.playerId);
                         if (!stand) {
                             throw new Error(`Couldn't find stand for player ${targetPosition.playerId}.`);
                         }
                         stand.set(targetPosition.index, letter);
                         break;
+                    }
                     case CellPositionType.BOARD:
                         this.board.letterPlace(targetPosition.position, letter, this.currentUserId, this.turn);
                         break;
@@ -293,7 +309,7 @@ export class Game {
         );
         this.peer.onPass(
             action((exchangedLetterCells: CellPositionStand[]) => {
-                exchangedLetterCells.forEach(exchange => {
+                exchangedLetterCells.forEach((exchange) => {
                     const stand = this.stands.get(exchange.playerId);
 
                     if (!stand) {
@@ -301,7 +317,7 @@ export class Game {
                     }
 
                     const removedLetters = stand.remove(exchange.index);
-                    const [ newLetter ] = this.letterBag.exchange(...removedLetters);
+                    const [newLetter] = this.letterBag.exchange(...removedLetters);
 
                     stand.set(exchange.index, newLetter);
                 });
