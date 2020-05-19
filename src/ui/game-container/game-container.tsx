@@ -3,7 +3,7 @@ import { external, inject } from "tsdi";
 import { observer } from "mobx-react";
 import { DndProvider } from "react-dnd-multi-backend";
 import HTML5toTouch from "react-dnd-multi-backend/dist/esm/HTML5toTouch";
-import { GameState } from "../../types";
+import { GameState, NetworkingMode } from "../../types";
 import "./game-container.scss";
 import { Game } from "../../game";
 import { invariant } from "../../utils";
@@ -12,6 +12,7 @@ import { Button, Segment, Popup, Progress } from "semantic-ui-react";
 import { action, computed } from "mobx";
 import { Scoreboard } from "../scoreboard/scoreboard";
 import { Status } from "../status";
+import { GameOver } from "../game-over";
 
 export interface GameContainerProps {
     className?: string;
@@ -39,10 +40,16 @@ export class GameContainer extends React.Component<GameContainerProps> {
     }
 
     @computed private get canEndTurn(): boolean {
+        if (this.game.isGameOver) {
+            return false;
+        }
         return this.game.users.ownUser.id === this.game.currentUserId && this.game.canEndTurn;
     }
 
     @computed private get canPass(): boolean {
+        if (this.game.isGameOver) {
+            return false;
+        }
         return this.game.users.ownUser.id === this.game.currentUserId && this.game.canPass;
     }
 
@@ -52,6 +59,14 @@ export class GameContainer extends React.Component<GameContainerProps> {
 
     @computed private get buttonPopupContent(): string {
         return this.game.endTurnMessage;
+    }
+
+    @computed private get showRestart(): boolean {
+        return this.game.networkMode === NetworkingMode.HOST && this.game.isGameOver;
+    }
+
+    @action.bound private handleRestart(): void {
+        this.game.restart();
     }
 
     public render(): JSX.Element {
@@ -65,6 +80,7 @@ export class GameContainer extends React.Component<GameContainerProps> {
                             <div className="GameContainer__container">
                                 <div className="GameContainer__mainArea">
                                     <Segment className="GameContainer__boardContainer">
+                                        <GameOver />
                                         <GameBoard className="GameContainer__board" />
                                     </Segment>
 
@@ -112,6 +128,23 @@ export class GameContainer extends React.Component<GameContainerProps> {
                                     </div>
                                     <div className="GameContainer__actions">
                                         <Segment className="GameContainer__sidebarSegment">
+                                            {
+                                                this.showRestart ? (
+                                                    <>
+                                                        <Button
+                                                            fluid
+                                                            icon="redo"
+                                                            labelPosition="left"
+                                                            size="big"
+                                                            content="Play again"
+                                                            onClick={this.handleRestart}
+                                                            primary
+                                                            className="GameContainer__commitButton"
+                                                        />
+                                                        <p />
+                                                    </>
+                                                ) : <></>
+                                            }
                                             <Popup
                                                 header="Cannot end turn"
                                                 content={this.buttonPopupContent}

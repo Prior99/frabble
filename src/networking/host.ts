@@ -117,6 +117,12 @@ export class Host extends Peer {
             config,
         });
     }
+
+    @bind public sendRestart(): void {
+        this.broadcastMessage({
+            message: HostMessageType.RESTART,
+        });
+    }
 }
 
 export async function createHost(users: RemoteUsers): Promise<Host> {

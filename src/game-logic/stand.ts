@@ -1,5 +1,6 @@
 import { observable, action, computed } from "mobx";
 import { Letter } from "../types";
+import { getPointsForLetter } from "./letters";
 
 export class Stand {
     public static readonly MAX_LETTERS = 7;
@@ -12,7 +13,7 @@ export class Stand {
     }
 
     @computed private get count(): number {
-        return Array.from(this.letters.values()).filter(value => value !== undefined).length;
+        return Array.from(this.letters.values()).filter((value) => value !== undefined).length;
     }
 
     @computed public get missingLetterCount(): number {
@@ -35,7 +36,7 @@ export class Stand {
     }
 
     @action.bound public remove(...indices: number[]): Letter[] {
-        const removedLetters = indices.map((index) => this.at(index)).filter(value => value !== undefined);
+        const removedLetters = indices.map((index) => this.at(index)).filter((value) => value !== undefined);
         for (const index of indices) {
             this.letters.set(index, undefined);
         }
@@ -48,5 +49,16 @@ export class Stand {
 
     @computed public get maxIndex(): number {
         return Math.max(...Array.from(this.letters.keys()), Stand.MAX_LETTERS + Stand.EMPTY);
+    }
+
+    @computed public get isEmpty(): boolean {
+        return this.count === 0;
+    }
+
+    @computed public get summedLetterScore(): number {
+        return Array.from(this.letters.values()).reduce(
+            (sum, letter) => (letter === undefined ? sum : sum + getPointsForLetter(letter)),
+            0,
+        );
     }
 }

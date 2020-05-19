@@ -1,5 +1,5 @@
 import { create as randomSeed } from "random-seed";
-import { subSeconds, addSeconds, isThisQuarter, differenceInSeconds, isAfter } from "date-fns";
+import { addSeconds, differenceInSeconds, isAfter } from "date-fns";
 import { computed, action, observable } from "mobx";
 import { Peer, Host, Client } from "../networking";
 import {
@@ -53,8 +53,7 @@ export class Game {
               fromTurn: number;
           }
         | undefined;
-
-    private interval: ReturnType<typeof setInterval> | undefined;
+    @observable public passedTurns = new Set<number>();
 
     @computed public get scoreList(): Score[] {
         return Array.from(this.scores.entries())
@@ -260,13 +259,55 @@ export class Game {
     }
 
     @action.bound private nextTurn(): void {
+        this.handleGameOver();
+        if (this.isGameOver) {
+            return;
+        }
         this.turn++;
         this.startTurn();
     }
 
+    @computed public get isGameOver(): boolean {
+        const hasEmptyStand = Array.from(this.stands.values()).some((stand) => stand.isEmpty);
+        if (this.letterBag.isEmpty && hasEmptyStand) {
+            return true;
+        }
+        if (this.turn < this.users.count * 2 - 1) {
+            return false;
+        }
+        for (let i = 0; i < this.users.count * 2; ++i) {
+            if (!this.passedTurns.has(this.turn - i)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @action.bound private handleGameOver(): void {
+        if (!this.isGameOver) {
+            return;
+        }
+        for (const user of this.users.all) {
+            this.scores.set(
+                user.id,
+                (this.scores.get(user.id) ?? 0) - (this.stands.get(user.id)?.missingLetterCount ?? 0),
+            );
+        }
+    }
+
+    @action.bound public restart(): void {
+        if (!(this.peer instanceof Host)) {
+            return;
+        }
+        this.peer.sendRestart();
+    }
+
     @action.bound public async initialize(networkId?: string): Promise<void> {
-        this.interval = setInterval(
+        setInterval(
             action(() => {
+                if (this.isGameOver) {
+                    return;
+                }
                 if (!this.times || this.times.fromTurn !== this.turn) {
                     return;
                 }
@@ -286,6 +327,19 @@ export class Game {
         const Ctor = typeof networkId === "string" ? Client : Host;
         this.peer = new Ctor(this.users);
 
+        this.peer.onRestart(
+            action(() => {
+                this.board.initialize();
+                this.letterBag.refill();
+                this.turnOrder.forEach((id) => {
+                    this.scores.set(id, 0);
+                    const stand = new Stand(this.letterBag.takeMany(Stand.MAX_LETTERS));
+                    this.stands.set(id, stand);
+                });
+                this.turn = 0;
+                this.startTurn();
+            }),
+        );
         this.peer.onWelcome(
             action((users) => {
                 this.users.add(...users);
@@ -311,7 +365,6 @@ export class Game {
                 this.turnOrder = shuffle(this.users.all.map(prop("id")).sort(), () => rng.floatBetween(0, 1));
                 this.turnOrder.forEach((id) => {
                     this.scores.set(id, 0);
-
                     const stand = new Stand(this.letterBag.takeMany(Stand.MAX_LETTERS));
                     this.stands.set(id, stand);
                 });
@@ -380,6 +433,7 @@ export class Game {
 
                     stand.set(exchange.index, newLetter);
                 });
+                this.passedTurns.add(this.turn);
                 this.nextTurn();
             }),
         );

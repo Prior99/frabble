@@ -10,6 +10,10 @@ export class LetterBag {
 
     public initialize(seed: string): void {
         this.rng = randomSeed(seed);
+        this.refill();
+    }
+
+    public refill(): void {
         for (const letter of allLetters()) {
             for (let i = 0; i < getLetterOccurence(letter); ++i) {
                 this.letters.push(letter);
@@ -54,5 +58,9 @@ export class LetterBag {
     @action.bound public exchange(...letters: Letter[]): Letter[] {
         this.putBack(...letters);
         return this.takeMany(letters.length);
+    }
+
+    @computed public get isEmpty(): boolean {
+        return this.count === 0;
     }
 }

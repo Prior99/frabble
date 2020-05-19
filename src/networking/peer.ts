@@ -34,6 +34,7 @@ export abstract class Peer extends EventEmitter {
     public onCellMove = this.registerEvent<(sourcePosition: CellPosition, targetPosition: CellPosition) => void>();
     public onPass = this.registerEvent<(letterPositions: CellPositionStand[]) => void>();
     public onEndTurn = this.registerEvent<() => void>();
+    public onRestart = this.registerEvent<() => void>();
 
     protected abstract sendClientMessage(message: ClientMessage): void;
 
@@ -48,6 +49,8 @@ export abstract class Peer extends EventEmitter {
                 return this.emit(this.onUserDisconnected, message.userId);
             case HostMessageType.GAME_START:
                 return this.emit(this.onGameStart, message.config);
+            case HostMessageType.RESTART:
+                return this.emit(this.onRestart);
             case HostMessageType.RELAYED_CLIENT_MESSAGE: {
                 const { clientMessage } = message;
                 switch (clientMessage.message) {
