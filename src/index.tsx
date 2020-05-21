@@ -17,7 +17,7 @@ tsdi.enableComponentScanner();
 
 ReactDOM.render(
     <div className="App">
-        <Background className="App__background" floating={tsdi.get(Game).state !== GameState.STARTED}/>
+        <Background className="App__background" floating={false}/>
         <div className="App__main">
             <Router history={tsdi.get("history")}>
                 <Switch>

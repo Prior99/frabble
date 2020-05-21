@@ -27,7 +27,9 @@
     opacity: 0.5;
 
     &--floating {
-        animation: float 60s linear infinite;
+        .Background__cells {
+            animation: float 60s linear infinite;
+        }
     }
 
     &__cells {
