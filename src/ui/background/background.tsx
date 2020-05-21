@@ -7,6 +7,7 @@ import classNames from "classnames";
 
 export interface BackgroundProps {
     className?: string;
+    floating?: boolean;
 }
 
 function randomMode(): CellMode {
@@ -34,7 +35,7 @@ for (let x = 0; x < size * size; ++x) {
 
 export class Background extends React.Component<BackgroundProps> {
     @computed private get classNames(): string {
-        return classNames("Background", this.props.className);
+        return classNames("Background", this.props.className, { "Background--floating": this.props.floating });
     }
 
     public render(): JSX.Element {
