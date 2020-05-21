@@ -344,8 +344,11 @@ export class Game {
                 if (isAfter(this.times.now!, this.times.deadline!)) {
                     if (this.currentUserId === this.users.ownUser.id) {
                         this.times = undefined;
+                        this.loading.add(LoadingFeatures.PASS);
                         this.returnAllLettersToStand();
-                        this.startPassing();
+                        if (!this.isPassing) {
+                            this.startPassing();
+                        }
                         this.confirmPassing();
                     }
                 } else {
