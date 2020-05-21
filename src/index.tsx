@@ -8,8 +8,6 @@ import { getRoutes } from "./routing";
 import { routeMainMenu } from "./pages";
 import "./app.scss";
 import { Background } from "./ui/background/background";
-import { Game } from "./game";
-import { GameState } from "./types";
 
 // Start dependency injection.
 const tsdi = new TSDI();
