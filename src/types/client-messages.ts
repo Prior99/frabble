@@ -6,6 +6,7 @@ export enum ClientMessageType {
     CELL_MOVE = "cell move",
     PASS = "pass",
     END_TURN = "end turn",
+    CHANGE_NAME = "change name",
 }
 
 export interface BaseClientMessage {
@@ -33,8 +34,14 @@ export interface ClientMessageEndTurn {
     message: ClientMessageType.END_TURN;
 }
 
+export interface ClientMessageChangeName {
+    message: ClientMessageType.CHANGE_NAME;
+    name: string;
+}
+
 export type ClientMessage =
     | ClientMessageHello
     | ClientMessageEndTurn
     | ClientMessageCellMove
+    | ClientMessageChangeName
     | ClientMessagePass;

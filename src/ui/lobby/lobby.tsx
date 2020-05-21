@@ -15,7 +15,7 @@ import {
 } from "semantic-ui-react";
 import { computed, action } from "mobx";
 import { observer } from "mobx-react";
-import { Language, NetworkingMode } from "../../types";
+import { Language, NetworkingMode, RemoteUser } from "../../types";
 import { MenuContainer } from "../../ui";
 import { Game } from "../../game";
 import "./lobby.scss";
@@ -101,6 +101,23 @@ export class Lobby extends React.Component<LobbyProps> {
         return `Can't copy to clipboard: "${this.connectUrl}".`;
     }
 
+    @computed private get ownUser(): RemoteUser {
+        return this.game.users.ownUser;
+    }
+
+    @computed private get nameValid(): boolean {
+        return this.ownUser.name.length > 0 && this.ownUser.name.length < 24;
+    }
+
+    @action.bound private handleNameChange(evt: React.SyntheticEvent<HTMLInputElement>): void {
+        const name = evt.currentTarget.value;
+        this.game.users.setOwnUser({
+            ...this.ownUser,
+            name,
+        });
+        this.game.peer?.sendChangeName(name);
+    }
+
     public render(): JSX.Element {
         return (
             <MenuContainer className={this.props.className}>
@@ -114,10 +131,14 @@ export class Lobby extends React.Component<LobbyProps> {
                                         <List.Item as="li" key={id} content={name} />
                                     ))}
                                 </List>
-                                {this.isHost ? (
-                                    <>
-                                        <h2>Options</h2>
-                                        <Form>
+                                <h2>Options</h2>
+                                <Form>
+                                    <Form.Field error={!this.nameValid}>
+                                        <label>Change name</label>
+                                        <Input value={this.ownUser.name} onChange={this.handleNameChange} />
+                                    </Form.Field>
+                                    {this.isHost ? (
+                                        <>
                                             <Form.Field>
                                                 <label>Language</label>
                                                 <Dropdown
@@ -148,13 +169,13 @@ export class Lobby extends React.Component<LobbyProps> {
                                                 onClick={this.handleStartClick}
                                                 content="Start"
                                             />
-                                        </Form>
-                                    </>
-                                ) : (
-                                    <p>
-                                        Please wait <b>patiently</b> for the host to start the game...
-                                    </p>
-                                )}
+                                        </>
+                                    ) : (
+                                        <p>
+                                            Please wait <b>patiently</b> for the host to start the game...
+                                        </p>
+                                    )}
+                                </Form>
                             </Segment>
                         </Grid.Column>
                     </Grid.Row>

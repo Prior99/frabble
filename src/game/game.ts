@@ -29,6 +29,12 @@ export interface Score {
     playerId: string;
 }
 
+export const enum LoadingFeatures {
+    NEXT_TURN = "next turn",
+    PASS = "pass",
+    RESTART = "restart",
+}
+
 @component
 export class Game {
     public users = new RemoteUsers();
@@ -54,6 +60,7 @@ export class Game {
           }
         | undefined;
     @observable public passedTurns = new Set<number>();
+    @observable public loading = new Set<LoadingFeatures>();
 
     @computed public get scoreList(): Score[] {
         return Array.from(this.scores.entries())
@@ -140,6 +147,7 @@ export class Game {
             throw new Error("Must start passing before committing.");
         }
 
+        this.loading.add(LoadingFeatures.PASS);
         this.peer?.sendPass(this.lettersToExchange);
         this.lettersToExchange = undefined;
     }
@@ -166,6 +174,26 @@ export class Game {
         }
 
         this.lettersToExchange = this.lettersToExchange.filter((exchange) => !cellPositionEquals(exchange, letterCell));
+    }
+
+    @action.bound public returnAllLettersToStand(): void {
+        const cells = this.board.getLettersForTurn(this.turn);
+        let index = 0;
+        cells.forEach((cell) => {
+            index = this.currentStand.nextFreePosition(index);
+            this.moveCell(
+                {
+                    positionType: CellPositionType.BOARD,
+                    position: cell.position,
+                },
+                {
+                    positionType: CellPositionType.STAND,
+                    playerId: this.currentUserId,
+                    index,
+                },
+            );
+            index++;
+        });
     }
 
     @computed public get isPassing(): boolean {
@@ -247,6 +275,7 @@ export class Game {
     }
 
     @action.bound public endTurn(): void {
+        this.loading.add(LoadingFeatures.NEXT_TURN);
         this.peer?.sendEndTurn();
     }
 
@@ -299,6 +328,7 @@ export class Game {
         if (!(this.peer instanceof Host)) {
             return;
         }
+        this.loading.add(LoadingFeatures.RESTART);
         this.peer.sendRestart();
     }
 
@@ -314,6 +344,7 @@ export class Game {
                 if (isAfter(this.times.now!, this.times.deadline!)) {
                     if (this.currentUserId === this.users.ownUser.id) {
                         this.times = undefined;
+                        this.returnAllLettersToStand();
                         this.startPassing();
                         this.confirmPassing();
                     }
@@ -338,6 +369,7 @@ export class Game {
                 });
                 this.turn = 0;
                 this.startTurn();
+                this.loading.delete(LoadingFeatures.RESTART);
             }),
         );
         this.peer.onWelcome(
@@ -417,6 +449,7 @@ export class Game {
                 const newLetters = this.letterBag.takeMany(this.currentStand.missingLetterCount);
                 this.currentStand.add(...newLetters);
                 this.nextTurn();
+                this.loading.delete(LoadingFeatures.NEXT_TURN);
             }),
         );
         this.peer.onPass(
@@ -435,6 +468,7 @@ export class Game {
                 });
                 this.passedTurns.add(this.turn);
                 this.nextTurn();
+                this.loading.delete(LoadingFeatures.PASS);
             }),
         );
 

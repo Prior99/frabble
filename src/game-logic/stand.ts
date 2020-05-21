@@ -47,6 +47,13 @@ export class Stand {
         return this.letters.get(index);
     }
 
+    public nextFreePosition(min = 0): number {
+        for (;this.letters.get(min) !== undefined; ++min) {
+            continue;
+        }
+        return min;
+    }
+
     @computed public get maxIndex(): number {
         return Math.max(...Array.from(this.letters.keys()), Stand.MAX_LETTERS + Stand.EMPTY);
     }

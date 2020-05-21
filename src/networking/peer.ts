@@ -51,6 +51,17 @@ export abstract class Peer extends EventEmitter {
                 return this.emit(this.onGameStart, message.config);
             case HostMessageType.RESTART:
                 return this.emit(this.onRestart);
+            case HostMessageType.CHANGE_NAME: {
+                const user = this.remoteUsers.getUser(message.userId);
+                if (!user) {
+                    throw new Error("Unknown user.");
+                }
+                if (user.id === this.remoteUsers.ownUser.id) {
+                    return;
+                }
+                user.name = message.name;
+                return;
+            }
             case HostMessageType.RELAYED_CLIENT_MESSAGE: {
                 const { clientMessage } = message;
                 switch (clientMessage.message) {
@@ -66,6 +77,8 @@ export abstract class Peer extends EventEmitter {
                         return this.emit(this.onEndTurn);
                     case ClientMessageType.HELLO:
                         throw new Error("Hello message must not be relayed.");
+                    case ClientMessageType.CHANGE_NAME:
+                        return;
                     default:
                         invariant(clientMessage);
                 }
@@ -124,6 +137,13 @@ export abstract class Peer extends EventEmitter {
     @bind public sendEndTurn(): void {
         this.sendClientMessage({
             message: ClientMessageType.END_TURN,
+        });
+    }
+
+    @bind public sendChangeName(name: string): void {
+        this.sendClientMessage({
+            message: ClientMessageType.CHANGE_NAME,
+            name,
         });
     }
 }

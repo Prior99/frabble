@@ -27,6 +27,13 @@ export class Host extends Peer {
     @bind protected handleClientMessage(userId: string, message: ClientMessage & BaseClientMessage): void {
         console.info(`Received client message from ${userId}:`, message);
         switch (message.message) {
+            case ClientMessageType.CHANGE_NAME:
+                this.broadcastMessage({
+                    message: HostMessageType.CHANGE_NAME,
+                    name: message.name,
+                    userId: message.originUserId,
+                });
+                return;
             case ClientMessageType.END_TURN:
             case ClientMessageType.CELL_MOVE:
             case ClientMessageType.PASS:

@@ -5,7 +5,7 @@ import { DndProvider } from "react-dnd-multi-backend";
 import HTML5toTouch from "react-dnd-multi-backend/dist/esm/HTML5toTouch";
 import { GameState, NetworkingMode } from "../../types";
 import "./game-container.scss";
-import { Game } from "../../game";
+import { Game, LoadingFeatures } from "../../game";
 import { invariant } from "../../utils";
 import { Lobby, GameBoard, GameStand } from "../../ui";
 import { Button, Segment, Popup, Progress } from "semantic-ui-react";
@@ -67,6 +67,18 @@ export class GameContainer extends React.Component<GameContainerProps> {
 
     @action.bound private handleRestart(): void {
         this.game.restart();
+    }
+
+    @computed private get passLoading(): boolean {
+        return this.game.loading.has(LoadingFeatures.PASS);
+    }
+
+    @computed private get nextTurnLoading(): boolean {
+        return this.game.loading.has(LoadingFeatures.NEXT_TURN);
+    }
+
+    @computed private get restartLoading(): boolean {
+        return this.game.loading.has(LoadingFeatures.RESTART);
     }
 
     public render(): JSX.Element {
@@ -134,6 +146,8 @@ export class GameContainer extends React.Component<GameContainerProps> {
                                                         <Button
                                                             fluid
                                                             icon="redo"
+                                                            loading={this.restartLoading}
+                                                            disable={this.restartLoading}
                                                             labelPosition="left"
                                                             size="big"
                                                             content="Play again"
@@ -154,7 +168,8 @@ export class GameContainer extends React.Component<GameContainerProps> {
                                                     <span>
                                                         <Button
                                                             fluid
-                                                            disabled={!this.canEndTurn}
+                                                            loading={this.nextTurnLoading}
+                                                            disabled={!this.canEndTurn || this.nextTurnLoading}
                                                             icon="thumbs up"
                                                             labelPosition="left"
                                                             size="big"
@@ -170,6 +185,8 @@ export class GameContainer extends React.Component<GameContainerProps> {
                                             {this.isPassing ? (
                                                 <Button.Group fluid size="big">
                                                     <Button
+                                                        loading={this.passLoading}
+                                                        disabled={this.passLoading}
                                                         content="Okay"
                                                         icon="check"
                                                         labelPosition="left"
@@ -180,6 +197,8 @@ export class GameContainer extends React.Component<GameContainerProps> {
                                                     />
                                                     <Button.Or />
                                                     <Button
+                                                        loading={this.passLoading}
+                                                        disabled={this.passLoading}
                                                         content="Abort"
                                                         icon="cancel"
                                                         labelPosition="right"
@@ -191,7 +210,8 @@ export class GameContainer extends React.Component<GameContainerProps> {
                                             ) : (
                                                 <Button
                                                     fluid
-                                                    disabled={!this.canPass}
+                                                    loading={this.passLoading}
+                                                    disabled={!this.canPass || this.passLoading}
                                                     icon="step forward"
                                                     labelPosition="left"
                                                     size="big"

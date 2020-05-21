@@ -9,6 +9,7 @@ export enum HostMessageType {
     GAME_START = "game start",
     RELAYED_CLIENT_MESSAGE = "relayed client message",
     RESTART = "restart",
+    CHANGE_NAME = "change name",
 }
 
 export interface HostMessageWelcome {
@@ -40,6 +41,11 @@ export interface HostMessageRestart {
     message: HostMessageType.RESTART;
 }
 
+export interface HostMessageChangeName {
+    message: HostMessageType.CHANGE_NAME;
+    name: string;
+    userId: string;
+}
 
 export type HostMessage =
     | HostMessageWelcome
@@ -47,4 +53,5 @@ export type HostMessage =
     | HostMessageUserDisconnected
     | HostMessageGameStart
     | HostMessageRelayedClientMessage
-    | HostMessageRestart;
+    | HostMessageRestart
+    | HostMessageChangeName;
