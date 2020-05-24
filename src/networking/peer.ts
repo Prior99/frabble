@@ -95,7 +95,7 @@ export abstract class Peer extends EventEmitter {
 
     @bind protected async open(): Promise<string> {
         await new Promise((resolve) => {
-            this.peer = new PeerJS(null as any); // eslint-disable-line
+            this.peer = new PeerJS(null as any, { host: "peerjs.92k.de", secure: true }); // eslint-disable-line
             this.peer.on("open", () => resolve());
         });
         if (!this.peer) {
