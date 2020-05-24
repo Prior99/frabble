@@ -15,7 +15,7 @@ export class Client extends Peer {
     @bind public async connect(networkId: string): Promise<void> {
         await this.open();
         await new Promise(resolve => {
-            this.connection = this.peer!.connect(networkId!, { reliable: true });
+            this.connection = this.peer!.connect(networkId!);
             this.connection.on("open", () => {
                 this.connection!.on("data", data => this.handleHostMessage(data));
                 this.sendHello(this.remoteUsers.ownUser);

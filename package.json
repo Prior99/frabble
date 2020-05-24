@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "main": "index.js",
     "scripts": {
-        "build": "webpack",
+        "build": "webpack -p",
         "start": "webpack-dev-server",
         "test": "jest",
         "lint": "eslint --max-warnings 0 src/**/*.ts src/**/*.tsx test/**/*.ts*"
