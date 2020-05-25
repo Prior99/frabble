@@ -15,11 +15,12 @@ import {
 } from "semantic-ui-react";
 import { computed, action } from "mobx";
 import { observer } from "mobx-react";
-import { Language, NetworkingMode, RemoteUser } from "../../types";
+import { Language, AppUser } from "../../types";
 import { MenuContainer } from "../../ui";
 import { Game } from "../../game";
 import "./lobby.scss";
 import { getLanguages, getFlagIcon, getLanguageName } from "../../utils";
+import { NetworkMode } from "p2p-networking";
 
 export interface LobbyProps {
     className?: string;
@@ -77,7 +78,7 @@ export class Lobby extends React.Component<LobbyProps> {
     }
 
     @computed private get isHost(): boolean {
-        return this.game.networkMode === NetworkingMode.HOST;
+        return this.game.networkMode === NetworkMode.HOST;
     }
 
     @action.bound private async handleIdClick(): Promise<void> {
@@ -91,7 +92,7 @@ export class Lobby extends React.Component<LobbyProps> {
     }
 
     @computed private get connectUrl(): string {
-        return location.href.replace(location.hash, `#/game/client/${this.game.peer?.networkId}`);
+        return location.href.replace(location.hash, `#/game/client/${this.game.networkId}`);
     }
 
     @computed private get popupText(): string {
@@ -101,21 +102,20 @@ export class Lobby extends React.Component<LobbyProps> {
         return `Can't copy to clipboard: "${this.connectUrl}".`;
     }
 
-    @computed private get ownUser(): RemoteUser {
-        return this.game.users.ownUser;
+    @computed private get ownUser(): AppUser | undefined {
+        return this.game.user;
     }
 
     @computed private get nameValid(): boolean {
+        if (!this.ownUser) {
+            return false;
+        }
         return this.ownUser.name.length > 0 && this.ownUser.name.length < 24;
     }
 
     @action.bound private handleNameChange(evt: React.SyntheticEvent<HTMLInputElement>): void {
         const name = evt.currentTarget.value;
-        this.game.users.setOwnUser({
-            ...this.ownUser,
-            name,
-        });
-        this.game.peer?.sendChangeName(name);
+        this.game.peer?.updateUser({ name });
     }
 
     public render(): JSX.Element {
@@ -127,7 +127,7 @@ export class Lobby extends React.Component<LobbyProps> {
                             <Segment>
                                 <h2>Players</h2>
                                 <List as="ul">
-                                    {this.game.users.all.map(({ id, name }) => (
+                                    {this.game.userList.map(({ id, name }) => (
                                         <List.Item as="li" key={id} content={name} />
                                     ))}
                                 </List>
@@ -135,7 +135,7 @@ export class Lobby extends React.Component<LobbyProps> {
                                 <Form>
                                     <Form.Field error={!this.nameValid}>
                                         <label>Change name</label>
-                                        <Input value={this.ownUser.name} onChange={this.handleNameChange} />
+                                        <Input value={this.ownUser?.name} onChange={this.handleNameChange} />
                                     </Form.Field>
                                     {this.isHost ? (
                                         <>
@@ -188,7 +188,7 @@ export class Lobby extends React.Component<LobbyProps> {
                                     <Message
                                         icon="globe"
                                         onClick={this.handleIdClick}
-                                        content={this.game.peer?.networkId}
+                                        content={this.game.networkId}
                                         className="Lobby__idMessage"
                                     />
                                 }

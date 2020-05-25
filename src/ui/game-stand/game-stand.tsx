@@ -7,7 +7,7 @@ import classnames from "classnames";
 import { CellPositionType } from "../../types";
 import "./game-stand.scss";
 import { GameCellConnected } from "../game-cell-connected";
-import { Stand } from "../../game-logic/stand";
+import { Stand } from "../../game/stand";
 
 export interface GameStandProps {
     className?: string;

@@ -5,7 +5,7 @@ import { Segment, Form, Tab, Input, TabProps } from "semantic-ui-react";
 import { Link } from "react-router-dom";
 import { observable, computed } from "mobx";
 import { observer } from "mobx-react";
-import { LobbyMode, RemoteUser } from "../../types";
+import { LobbyMode } from "../../types";
 import { routeGame } from "../page-game";
 import { bind } from "bind-decorator";
 import "./page-main-menu.scss";
@@ -22,27 +22,12 @@ export class PageMainMenu extends React.Component<RouteProps<{}>> {
     @observable private otherId = "";
     @observable private activeTab = 0;
 
-    @bind private handleNameChange(evt: React.SyntheticEvent<HTMLInputElement>): void {
-        this.game.users.setOwnUser({
-            ...this.ownUser,
-            name: evt.currentTarget.value,
-        });
-    }
-
     @bind private handleOtherIdChange(evt: React.SyntheticEvent<HTMLInputElement>): void {
         this.otherId = evt.currentTarget.value;
     }
 
     @bind private handleTabChange(_: unknown, { activeIndex }: TabProps): void {
         this.activeTab = activeIndex as number;
-    }
-
-    @computed private get ownUser(): RemoteUser {
-        return this.game.users.ownUser;
-    }
-
-    @computed private get nameValid(): boolean {
-        return this.ownUser.name.length > 0 && this.ownUser.name.length < 24;
     }
 
     @computed private get panes(): { menuItem: string }[] {
@@ -58,10 +43,6 @@ export class PageMainMenu extends React.Component<RouteProps<{}>> {
                 </div>
                 <Segment className="PageMainMenu__segment">
                     <Form>
-                        <Form.Field error={!this.nameValid}>
-                            <label>Change name</label>
-                            <Input value={this.ownUser.name} onChange={this.handleNameChange} />
-                        </Form.Field>
                         <Tab
                             className="PageMainMenu__tab"
                             panes={this.panes}
@@ -79,7 +60,6 @@ export class PageMainMenu extends React.Component<RouteProps<{}>> {
                                         icon="sign-in"
                                         labelPosition="left"
                                         className="PageMainMenu__button"
-                                        disabled={!this.nameValid}
                                         primary
                                         fluid
                                         content="Join"
@@ -94,7 +74,6 @@ export class PageMainMenu extends React.Component<RouteProps<{}>> {
                                     labelPosition="left"
                                     primary
                                     className="PageMainMenu__button"
-                                    disabled={!this.nameValid}
                                     fluid
                                     content="Host"
                                 />

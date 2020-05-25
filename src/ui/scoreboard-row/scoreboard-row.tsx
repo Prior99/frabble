@@ -17,7 +17,7 @@ export class ScoreboardRow extends React.Component<ScoreboardRowProps> {
     @inject private game!: Game;
 
     @computed private get playerName(): string {
-        return this.game.users.getUser(this.props.playerId)?.name ?? "";
+        return this.game.getUser(this.props.playerId)?.name ?? "";
     }
 
     @computed private get score(): string {
@@ -29,7 +29,7 @@ export class ScoreboardRow extends React.Component<ScoreboardRowProps> {
     }
 
     @computed private get showRibbon(): boolean {
-        return this.game.users.ownUser.id === this.props.playerId || this.game.currentUserId === this.props.playerId;
+        return this.game.user?.id === this.props.playerId || this.game.currentUserId === this.props.playerId;
     }
 
     @computed private get ribbonColor(): SemanticCOLORS | undefined {

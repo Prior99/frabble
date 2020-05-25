@@ -4,7 +4,7 @@ import { observer } from "mobx-react";
 import classnames from "classnames";
 import { computed } from "mobx";
 import "./game-cell.scss";
-import { getPointsForLetter } from "../../game-logic/letters";
+import { getPointsForLetter } from "../../game/letters";
 import { invariant } from "../../utils";
 
 export interface BaseGameCellProps {

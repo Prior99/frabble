@@ -118,7 +118,7 @@ export class GameCellConnected extends React.Component<GameCellConnectedProps> {
         if (this.props.position.positionType === CellPositionType.STAND) {
             return false;
         }
-        if (this.game.currentUserId !== this.game.users.ownUser.id) {
+        if (this.game.currentUserId !== this.game.user?.id) {
             return true;
         }
         return false;

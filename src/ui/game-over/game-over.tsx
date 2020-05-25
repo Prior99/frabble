@@ -11,11 +11,14 @@ export class GameOver extends React.Component {
     @inject private game!: Game;
 
     @computed private get score(): number {
-        return this.game.scores.get(this.game.users.ownUser.id) ?? 0;
+        if (!this.game.user) {
+            return 0;
+        }
+        return this.game.scores.get(this.game.user.id) ?? 0;
     }
 
     @computed private get rank(): number {
-        return this.game.scoreList.findIndex(({ playerId }) => playerId === this.game.users.ownUser.id) + 1;
+        return this.game.scoreList.findIndex(({ playerId }) => playerId === this.game.user?.id) + 1;
     }
 
     public render(): JSX.Element {

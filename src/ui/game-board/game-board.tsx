@@ -7,7 +7,7 @@ import { CellPositionType } from "../../types";
 import { external, inject } from "tsdi";
 import { Game } from "../../game";
 import { GameCellConnected } from "../game-cell-connected";
-import { Board } from "../../game-logic";
+import { Board } from "../../game";
 
 export interface GameBoardProps {
     className?: string;

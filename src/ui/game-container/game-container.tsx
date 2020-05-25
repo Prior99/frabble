@@ -3,7 +3,7 @@ import { external, inject } from "tsdi";
 import { observer } from "mobx-react";
 import { DndProvider } from "react-dnd-multi-backend";
 import HTML5toTouch from "react-dnd-multi-backend/dist/esm/HTML5toTouch";
-import { GameState, NetworkingMode } from "../../types";
+import { GameState } from "../../types";
 import "./game-container.scss";
 import { Game, LoadingFeatures } from "../../game";
 import { invariant } from "../../utils";
@@ -13,6 +13,7 @@ import { action, computed } from "mobx";
 import { Scoreboard } from "../scoreboard/scoreboard";
 import { Status } from "../status";
 import { GameOver } from "../game-over";
+import { NetworkMode } from "p2p-networking";
 
 export interface GameContainerProps {
     className?: string;
@@ -43,14 +44,14 @@ export class GameContainer extends React.Component<GameContainerProps> {
         if (this.game.isGameOver) {
             return false;
         }
-        return this.game.users.ownUser.id === this.game.currentUserId && this.game.canEndTurn;
+        return this.game.user?.id === this.game.currentUserId && this.game.canEndTurn;
     }
 
     @computed private get canPass(): boolean {
         if (this.game.isGameOver) {
             return false;
         }
-        return this.game.users.ownUser.id === this.game.currentUserId && this.game.canPass;
+        return this.game.user?.id === this.game.currentUserId && this.game.canPass;
     }
 
     @computed private get isPassing(): boolean {
@@ -62,7 +63,7 @@ export class GameContainer extends React.Component<GameContainerProps> {
     }
 
     @computed private get showRestart(): boolean {
-        return this.game.networkMode === NetworkingMode.HOST && this.game.isGameOver;
+        return this.game.networkMode === NetworkMode.HOST && this.game.isGameOver;
     }
 
     @action.bound private handleRestart(): void {
@@ -104,7 +105,7 @@ export class GameContainer extends React.Component<GameContainerProps> {
                                         trigger={
                                             <Segment className="GameContainer__standContainer">
                                                 <GameStand
-                                                    playerId={this.game.users.ownUser.id}
+                                                    playerId={this.game.user?.id ?? ""}
                                                     className="GameContainer__stand"
                                                 />
                                             </Segment>
@@ -121,12 +122,12 @@ export class GameContainer extends React.Component<GameContainerProps> {
                                                     percent={this.game.progressPercent}
                                                     content={`${this.game.secondsLeft}s`}
                                                     color={
-                                                        this.game.currentUserId === this.game.users.ownUser.id
+                                                        this.game.currentUserId === this.game.user?.id
                                                             ? "blue"
                                                             : undefined
                                                     }
                                                     error={
-                                                        this.game.currentUserId === this.game.users.ownUser.id &&
+                                                        this.game.currentUserId === this.game.user?.id &&
                                                         this.game.progressPercent > 80
                                                     }
                                                 />

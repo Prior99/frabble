@@ -1,26 +1,37 @@
 import { create as randomSeed } from "random-seed";
 import { addSeconds, differenceInSeconds, isAfter } from "date-fns";
 import { computed, action, observable } from "mobx";
-import { Peer, Host, Client } from "../networking";
 import {
-    NetworkingMode,
     GameState,
     Language,
-    RemoteUser,
     Letter,
     CellPosition,
     CellPositionType,
     CellPositionStand,
+    AppUser,
+    MessageType,
+    MessageGameStart,
+    MessageCellMove,
+    MessageRestart,
+    MessagePass,
+    MessageEndTurn,
 } from "../types";
-import { RemoteUsers } from "./remote-users";
 import { component } from "tsdi";
 import { GameConfig } from "../types";
 import { v4 } from "uuid";
-import { Board, ValidityResult } from "../game-logic";
-import { LetterBag } from "../game-logic/letter-bag";
+import { Board, ValidityResult } from "../game";
+import { LetterBag } from "../game/letter-bag";
 import { prop } from "ramda";
-import { shuffle, invariant, cellPositionEquals } from "../utils";
-import { Stand } from "../game-logic/stand";
+import {
+    shuffle,
+    invariant,
+    cellPositionEquals,
+    generateUserName,
+    serializeCellPosition,
+    deserializeCellPosition,
+} from "../utils";
+import { Stand } from "../game/stand";
+import { createClient, createHost, PeerOptions, Peer, NetworkMode, MessageFactory } from "p2p-networking";
 
 export interface Score {
     rank: number;
@@ -37,13 +48,16 @@ export const enum LoadingFeatures {
 
 @component
 export class Game {
-    public users = new RemoteUsers();
+    @observable public users = new Map<string, AppUser>();
+    @observable public userId: string | undefined;
+    @observable public networkMode = NetworkMode.DISCONNECTED;
+    @observable public networkId: string | undefined;
     @observable public config: GameConfig = {
         language: Language.GERMAN,
         seed: v4(),
     };
     @observable public state = GameState.LOBBY;
-    @observable.shallow public peer: Peer | undefined;
+    public peer: Peer<AppUser, MessageType> | undefined;
     public board = new Board();
     public letterBag = new LetterBag();
     @observable public turnOrder: string[] = [];
@@ -62,10 +76,16 @@ export class Game {
     @observable public passedTurns = new Set<number>();
     @observable public loading = new Set<LoadingFeatures>();
 
+    private messageGameStart?: MessageFactory<MessageType, MessageGameStart>;
+    private messageRestart?: MessageFactory<MessageType, MessageRestart>;
+    private messagePass?: MessageFactory<MessageType, MessagePass>;
+    private messageCellMove?: MessageFactory<MessageType, MessageCellMove>;
+    private messageEndTurn?: MessageFactory<MessageType, MessageEndTurn>;
+
     @computed public get scoreList(): Score[] {
         return Array.from(this.scores.entries())
             .sort((a, b) => b[1] - a[1])
-            .map(([playerId, score]) => ({ playerId, playerName: this.users.getUser(playerId)?.name ?? "", score }))
+            .map(([playerId, score]) => ({ playerId, playerName: this.getUser(playerId)?.name ?? "", score }))
             .map(({ playerName, playerId, score }, index) => ({
                 rank: index + 1,
                 score,
@@ -78,22 +98,27 @@ export class Game {
         return this.scoreList.find((entry) => entry.playerId === playerId)?.rank ?? 0;
     }
 
-    @computed public get networkMode(): NetworkingMode {
-        if (!this.peer) {
-            return NetworkingMode.DISCONNECTED;
+    public getUser(userId: string): AppUser | undefined {
+        return this.users.get(userId);
+    }
+
+    @computed public get user(): AppUser | undefined {
+        if (!this.userId) {
+            return;
         }
-        if (this.peer instanceof Host) {
-            return NetworkingMode.HOST;
-        }
-        return NetworkingMode.CLIENT;
+        return this.users.get(this.userId);
+    }
+
+    @computed public get userList(): AppUser[] {
+        return Array.from(this.users.values());
     }
 
     @computed public get currentUserId(): string {
         return this.turnOrder[this.turn % this.turnOrder.length];
     }
 
-    @computed public get currentUser(): RemoteUser {
-        const user = this.users.getUser(this.currentUserId);
+    @computed public get currentUser(): AppUser {
+        const user = this.users.get(this.currentUserId);
         if (!user) {
             throw new Error(`Inconsistency: User ${this.currentUserId} is unknown.`);
         }
@@ -109,14 +134,23 @@ export class Game {
     }
 
     @action.bound public startGame(): void {
-        if (!(this.peer instanceof Host)) {
+        if (this.networkMode !== NetworkMode.HOST) {
             throw new Error("Client can't start game.");
         }
-        this.peer.sendGameStart(this.config);
+        if (!this.messageGameStart) {
+            throw new Error("Network not initialized.");
+        }
+        this.messageGameStart.send({ config: this.config });
     }
 
     @action.bound public moveCell(sourcePosition: CellPosition, targetPosition: CellPosition): void {
-        this.peer?.sendCellMove({ sourcePosition, targetPosition });
+        if (!this.messageCellMove) {
+            throw new Error("Network not initialized.");
+        }
+        this.messageCellMove.send({
+            sourcePosition: serializeCellPosition(sourcePosition),
+            targetPosition: serializeCellPosition(targetPosition),
+        });
     }
 
     @action.bound private awardScore(): void {
@@ -142,13 +176,17 @@ export class Game {
         this.lettersToExchange = [];
     }
 
-    @action.bound public confirmPassing(): void {
+    @action.bound public async confirmPassing(): Promise<void> {
+        if (!this.messagePass) {
+            throw new Error("Network not initialized.");
+        }
         if (this.lettersToExchange === undefined) {
             throw new Error("Must start passing before committing.");
         }
 
         this.loading.add(LoadingFeatures.PASS);
-        this.peer?.sendPass(this.lettersToExchange);
+        await this.messagePass.send({ exchangedLetters: this.lettersToExchange }).waitForAll();
+        this.loading.add(LoadingFeatures.PASS);
         this.lettersToExchange = undefined;
     }
 
@@ -209,7 +247,7 @@ export class Game {
     }
 
     @computed public get endTurnMessage(): string {
-        if (this.currentUserId !== this.users.ownUser.id) {
+        if (this.currentUserId !== this.user?.id) {
             return "It's not your turn.";
         }
         const valid = this.currentTurnValid;
@@ -274,9 +312,13 @@ export class Game {
         }
     }
 
-    @action.bound public endTurn(): void {
+    @action.bound public async endTurn(): Promise<void> {
+        if (!this.messageEndTurn) {
+            throw new Error("Network not initialized.");
+        }
         this.loading.add(LoadingFeatures.NEXT_TURN);
-        this.peer?.sendEndTurn();
+        await this.messageEndTurn.send({}).waitForAll();
+        this.loading.delete(LoadingFeatures.NEXT_TURN);
     }
 
     @action.bound private startTurn(): void {
@@ -301,10 +343,10 @@ export class Game {
         if (this.letterBag.isEmpty && hasEmptyStand && this.board.getLettersForTurn(this.turn).length === 0) {
             return true;
         }
-        if (this.turn < this.users.count * 2 - 1) {
+        if (this.turn < this.users.size * 2 - 1) {
             return false;
         }
-        for (let i = 0; i < this.users.count * 2; ++i) {
+        for (let i = 0; i < this.users.size * 2; ++i) {
             if (!this.passedTurns.has(this.turn - i)) {
                 return false;
             }
@@ -316,7 +358,7 @@ export class Game {
         if (!this.isGameOver) {
             return;
         }
-        for (const user of this.users.all) {
+        for (const user of this.userList) {
             this.scores.set(
                 user.id,
                 (this.scores.get(user.id) ?? 0) - (this.stands.get(user.id)?.missingLetterCount ?? 0),
@@ -324,15 +366,20 @@ export class Game {
         }
     }
 
-    @action.bound public restart(): void {
-        if (!(this.peer instanceof Host)) {
+    @action.bound public async restart(): Promise<void> {
+        if (this.networkMode !== NetworkMode.HOST) {
             return;
         }
+        if (!this.messageRestart) {
+            throw new Error("Network not initialized.");
+        }
         this.loading.add(LoadingFeatures.RESTART);
-        this.peer.sendRestart();
+        await this.messageRestart.send({}).waitForAll();
+        this.loading.delete(LoadingFeatures.RESTART);
     }
 
     @action.bound public async initialize(networkId?: string): Promise<void> {
+        this.networkMode = NetworkMode.CONNECTING;
         setInterval(
             action(() => {
                 if (this.isGameOver) {
@@ -342,7 +389,7 @@ export class Game {
                     return;
                 }
                 if (isAfter(this.times.now!, this.times.deadline!)) {
-                    if (this.currentUserId === this.users.ownUser.id) {
+                    if (this.currentUserId === this.user?.id) {
                         this.times = undefined;
                         this.loading.add(LoadingFeatures.PASS);
                         this.returnAllLettersToStand();
@@ -358,10 +405,36 @@ export class Game {
             500,
         );
 
-        const Ctor = typeof networkId === "string" ? Client : Host;
-        this.peer = new Ctor(this.users);
+        const options: PeerOptions<AppUser> = {
+            applicationProtocolVersion: "0.0.0",
+            user: {
+                name: generateUserName(),
+            },
+            peerJsOptions: {
+                host: "peerjs.92k.de",
+                secure: true,
+            },
+        };
+        this.peer = networkId
+            ? await createClient(options, networkId)
+            : await createHost({ ...options, pingInterval: 10 });
 
-        this.peer.onRestart(
+
+        for (const user of this.peer.users) {
+            this.users.set(user.id, user);
+        }
+
+        this.userId = this.peer.userId;
+        this.networkId = this.peer.hostConnectionId;
+        this.networkMode = this.peer.networkMode;
+
+        this.messageRestart = this.peer.message<MessageRestart>(MessageType.RESTART);
+        this.messagePass = this.peer.message<MessagePass>(MessageType.PASS);
+        this.messageGameStart = this.peer.message<MessageGameStart>(MessageType.GAME_START);
+        this.messageCellMove = this.peer.message<MessageCellMove>(MessageType.CELL_MOVE);
+        this.messageEndTurn = this.peer.message<MessageEndTurn>(MessageType.END_TURN);
+
+        this.messageRestart.subscribe(
             action(() => {
                 this.board.initialize();
                 this.letterBag.refill();
@@ -375,29 +448,14 @@ export class Game {
                 this.loading.delete(LoadingFeatures.RESTART);
             }),
         );
-        this.peer.onWelcome(
-            action((users) => {
-                this.users.add(...users);
-            }),
-        );
-        this.peer.onUserConnected(
-            action((user) => {
-                this.users.add(user);
-            }),
-        );
-        this.peer.onUserDisconnected(
-            action((userId) => {
-                this.users.remove(userId);
-            }),
-        );
-        this.peer.onGameStart(
-            action((config) => {
+        this.messageGameStart.subscribe(
+            action(({ config }) => {
                 this.state = GameState.STARTED;
                 this.config = config;
                 this.board.initialize();
                 const rng = randomSeed(config.seed);
                 this.letterBag.initialize(config.seed);
-                this.turnOrder = shuffle(this.users.all.map(prop("id")).sort(), () => rng.floatBetween(0, 1));
+                this.turnOrder = shuffle(this.userList.map(prop("id")).sort(), () => rng.floatBetween(0, 1));
                 this.turnOrder.forEach((id) => {
                     this.scores.set(id, 0);
                     const stand = new Stand(this.letterBag.takeMany(Stand.MAX_LETTERS));
@@ -407,8 +465,10 @@ export class Game {
                 this.startTurn();
             }),
         );
-        this.peer.onCellMove(
-            action((sourcePosition: CellPosition, targetPosition: CellPosition) => {
+        this.messageCellMove.subscribe(
+            action((movement) => {
+                const sourcePosition = deserializeCellPosition(movement.sourcePosition);
+                const targetPosition = deserializeCellPosition(movement.targetPosition);
                 const letter = this.getLetter(sourcePosition);
                 if (!letter) {
                     throw new Error("Cannot move empty cell.");
@@ -445,19 +505,21 @@ export class Game {
                 }
             }),
         );
-        this.peer.onEndTurn(
+        this.messageEndTurn.subscribe(
             action(() => {
                 this.awardScore();
                 this.abortPassing();
                 const newLetters = this.letterBag.takeMany(this.currentStand.missingLetterCount);
                 this.currentStand.add(...newLetters);
                 this.nextTurn();
-                this.loading.delete(LoadingFeatures.NEXT_TURN);
             }),
         );
-        this.peer.onPass(
-            action((exchangedLetterCells: CellPositionStand[]) => {
-                exchangedLetterCells.forEach((exchange) => {
+        this.messagePass.subscribe(
+            action(({ exchangedLetters }) => {
+                exchangedLetters.forEach((exchange) => {
+                    if (exchange.positionType !== CellPositionType.STAND) {
+                        throw new Error("Can't exchange letters from board.");
+                    }
                     const stand = this.stands.get(exchange.playerId);
 
                     if (!stand) {
@@ -471,15 +533,15 @@ export class Game {
                 });
                 this.passedTurns.add(this.turn);
                 this.nextTurn();
-                this.loading.delete(LoadingFeatures.PASS);
             }),
         );
-
-        if (this.peer instanceof Host) {
-            await this.peer.host();
-        }
-        if (this.peer instanceof Client) {
-            await this.peer.connect(networkId as string);
-        }
+        this.peer.on(
+            "userconnect",
+            action((user) => this.users.set(user.id, user)),
+        );
+        this.peer.on(
+            "userdisconnect",
+            action((userId) => this.users.delete(userId)),
+        );
     }
 }
