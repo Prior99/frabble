@@ -3,7 +3,7 @@
   "name": "Frabble",
   "icons": [
     {
-      "src": "images/logo.png",
+      "src": "dist/logo.png",
       "type": "image/png",
       "sizes": "200x200"
     }

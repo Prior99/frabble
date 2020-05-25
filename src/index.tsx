@@ -2,7 +2,6 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { TSDI } from "tsdi";
 import { Router, Route, Switch, Redirect } from "react-router-dom";
-import "semantic-ui-css-offline/semantic.min.css";
 import "./factories";
 import { getRoutes } from "./routing";
 import { routeMainMenu } from "./pages";
