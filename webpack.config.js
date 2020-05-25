@@ -46,7 +46,6 @@ module.exports = {
         ],
     },
     devtool: "source-map",
-    externals: ["jsdom"],
     plugins: [
         new Webpack.DefinePlugin({
             // Taken and adapted from the official README.
