@@ -1,16 +1,17 @@
 import * as React from "react";
+import { History } from "history";
 import { Route, addRoute, RouteProps } from "../../routing";
 import { external, inject } from "tsdi";
-import { Segment, Form, Tab, Input, TabProps } from "semantic-ui-react";
-import { Link } from "react-router-dom";
-import { observable, computed } from "mobx";
+import { Segment } from "semantic-ui-react";
 import { observer } from "mobx-react";
-import { LobbyMode } from "../../types";
-import { routeGame } from "../page-game";
 import { bind } from "bind-decorator";
 import "./page-main-menu.scss";
 import { MenuContainer } from "../../ui";
 import { Game } from "../../game";
+import { ConnectMenu } from "p2p-networking-semantic-ui-react";
+import { NetworkMode } from "p2p-networking";
+import { routeGame } from "../page-game";
+import { LobbyMode } from "../../types";
 
 declare const SOFTWARE_VERSION: string;
 
@@ -18,20 +19,14 @@ declare const SOFTWARE_VERSION: string;
 @observer
 export class PageMainMenu extends React.Component<RouteProps<{}>> {
     @inject private game!: Game;
+    @inject("history") private history!: History;
 
-    @observable private otherId = "";
-    @observable private activeTab = 0;
-
-    @bind private handleOtherIdChange(evt: React.SyntheticEvent<HTMLInputElement>): void {
-        this.otherId = evt.currentTarget.value;
-    }
-
-    @bind private handleTabChange(_: unknown, { activeIndex }: TabProps): void {
-        this.activeTab = activeIndex as number;
-    }
-
-    @computed private get panes(): { menuItem: string }[] {
-        return [{ menuItem: "Join" }, { menuItem: "Host" }];
+    @bind private handleSubmit(networkMode: NetworkMode, peerId?: string): void {
+        if (networkMode === NetworkMode.CLIENT) {
+            this.history.push(routeGame.path(LobbyMode.CLIENT, peerId));
+        } else {
+            this.history.push(routeGame.path(LobbyMode.HOST));
+        }
     }
 
     public render(): JSX.Element {
@@ -42,44 +37,7 @@ export class PageMainMenu extends React.Component<RouteProps<{}>> {
                     <h1 className="PageMainMenu__name">Frabble</h1>
                 </div>
                 <Segment className="PageMainMenu__segment">
-                    <Form>
-                        <Tab
-                            className="PageMainMenu__tab"
-                            panes={this.panes}
-                            activeIndex={this.activeTab}
-                            onTabChange={this.handleTabChange}
-                        />
-                        {this.activeTab === 0 && (
-                            <>
-                                <Form.Field>
-                                    <label>Join</label>
-                                    <Input value={this.otherId} onChange={this.handleOtherIdChange} />
-                                </Form.Field>
-                                <Link to={routeGame.path(LobbyMode.CLIENT, this.otherId)}>
-                                    <Form.Button
-                                        icon="sign-in"
-                                        labelPosition="left"
-                                        className="PageMainMenu__button"
-                                        primary
-                                        fluid
-                                        content="Join"
-                                    />
-                                </Link>
-                            </>
-                        )}
-                        {this.activeTab === 1 && (
-                            <Link to={routeGame.path(LobbyMode.HOST)}>
-                                <Form.Button
-                                    icon="chess king"
-                                    labelPosition="left"
-                                    primary
-                                    className="PageMainMenu__button"
-                                    fluid
-                                    content="Host"
-                                />
-                            </Link>
-                        )}
-                    </Form>
+                    <ConnectMenu onSubmit={this.handleSubmit} />
                 </Segment>
                 <div className="PageMainMenu__version">{`Version #${SOFTWARE_VERSION}`}</div>
             </MenuContainer>

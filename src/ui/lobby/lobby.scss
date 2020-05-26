@@ -4,9 +4,12 @@
     &__idMessage {
         width: 300px;
         cursor: pointer;
-        border-color: color("secondary1", 4) !important;
-        color: color("secondary1", 0) !important;
-        background-color: lighten(color("secondary1", 1), 25%) !important;
+
+        &.positive {
+            border-color: color("secondary1", 4) !important;
+            color: color("secondary1", 0) !important;
+            background-color: lighten(color("secondary1", 1), 25%) !important;
+        }
 
         p {
             font-size: 1rem !important;

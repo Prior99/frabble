@@ -5709,10 +5709,20 @@ p-try@^2.0.0:
   resolved "https://registry.yarnpkg.com/p-try/-/p-try-2.2.0.tgz#cb2868540e313d61de58fafbe35ce9004d5540e6"
   integrity sha512-R4nPAVTAU0B9D35/Gk3uJf/7XYbQcyohSKdvAxIRSNghFl4e71hVoGnBNQz9cWaXxO2I10KTC+3jMdvvoKw6dQ==
 
-p2p-networking@^0.1.2:
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/p2p-networking/-/p2p-networking-0.1.2.tgz#d3407cba8553d2ceff5d13ccf95b76577bb43ceb"
-  integrity sha512-IGls+K0GoXAYAkVpuIOLJSFXSRTQktznItufm45qtVQEZZ9ayRysLRGy4xkOslkG52XuY2z/chnsAiJy6/WFew==
+p2p-networking-mobx@^0.1.5:
+  version "0.1.5"
+  resolved "https://registry.yarnpkg.com/p2p-networking-mobx/-/p2p-networking-mobx-0.1.5.tgz#d40f7fee47fbf06399a14291f981e8bb3239e29e"
+  integrity sha512-X6jorRKledr1uPRb7cSX9UDOOGlf2qYJkjFZ+9J3MbksBVxVxjxBq5J4Kji73QbouCOLOW/jK+VLaGKw0OI3+Q==
+
+p2p-networking-semantic-ui-react@^0.1.8:
+  version "0.1.8"
+  resolved "https://registry.yarnpkg.com/p2p-networking-semantic-ui-react/-/p2p-networking-semantic-ui-react-0.1.8.tgz#bd07e57d0dadda55e2b47e7745339617cf82a581"
+  integrity sha512-flfc3a+LQnH8OAC+8Ys3pi8F0eZBhkDouvG9MsaezmLVOp/wwmguJngM7JbN9P8D3JQ0Tw6+Pdh0tErjkNWM1Q==
+
+p2p-networking@^0.1.5:
+  version "0.1.5"
+  resolved "https://registry.yarnpkg.com/p2p-networking/-/p2p-networking-0.1.5.tgz#18a452820232ca3b50425505b900cff11c6d9e14"
+  integrity sha512-nBC8NkasZvYpY2xt8EfP9RHhfKaKL1z1T2DPfQ4emn699ajdFzCUU1Sdb2oAH+zYYk/sMVOjKAuYSorP1MNngw==
   dependencies:
     debug "^4.1.1"
     peerjs "^1.2.0"

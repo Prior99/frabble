@@ -31,7 +31,8 @@ import {
     deserializeCellPosition,
 } from "../utils";
 import { Stand } from "../game/stand";
-import { createClient, createHost, PeerOptions, Peer, NetworkMode, MessageFactory } from "p2p-networking";
+import { PeerOptions, NetworkMode, MessageFactory } from "p2p-networking";
+import { ObservablePeer, createObservableClient, createObservableHost } from "p2p-networking-mobx";
 
 export interface Score {
     rank: number;
@@ -48,16 +49,12 @@ export const enum LoadingFeatures {
 
 @component
 export class Game {
-    @observable public users = new Map<string, AppUser>();
-    @observable public userId: string | undefined;
-    @observable public networkMode = NetworkMode.DISCONNECTED;
-    @observable public networkId: string | undefined;
     @observable public config: GameConfig = {
         language: Language.GERMAN,
         seed: v4(),
     };
     @observable public state = GameState.LOBBY;
-    public peer: Peer<AppUser, MessageType> | undefined;
+    @observable.shallow public peer: ObservablePeer<AppUser, MessageType> | undefined;
     public board = new Board();
     public letterBag = new LetterBag();
     @observable public turnOrder: string[] = [];
@@ -99,26 +96,31 @@ export class Game {
     }
 
     public getUser(userId: string): AppUser | undefined {
-        return this.users.get(userId);
-    }
-
-    @computed public get user(): AppUser | undefined {
-        if (!this.userId) {
-            return;
-        }
-        return this.users.get(this.userId);
+        return this.peer?.getUser(userId);
     }
 
     @computed public get userList(): AppUser[] {
-        return Array.from(this.users.values());
+        return this.peer?.users ?? [];
+    }
+
+    @computed public get userId(): string {
+        return this.peer?.userId ?? "";
+    }
+
+    @computed public get user(): AppUser | undefined {
+        return this.getUser(this.userId);
     }
 
     @computed public get currentUserId(): string {
         return this.turnOrder[this.turn % this.turnOrder.length];
     }
 
+    @computed public get networkMode(): NetworkMode {
+        return this.peer?.networkMode ?? NetworkMode.DISCONNECTED;
+    }
+
     @computed public get currentUser(): AppUser {
-        const user = this.users.get(this.currentUserId);
+        const user = this.getUser(this.currentUserId);
         if (!user) {
             throw new Error(`Inconsistency: User ${this.currentUserId} is unknown.`);
         }
@@ -343,10 +345,10 @@ export class Game {
         if (this.letterBag.isEmpty && hasEmptyStand && this.board.getLettersForTurn(this.turn).length === 0) {
             return true;
         }
-        if (this.turn < this.users.size * 2 - 1) {
+        if (this.turn < this.userList.length * 2 - 1) {
             return false;
         }
-        for (let i = 0; i < this.users.size * 2; ++i) {
+        for (let i = 0; i < this.userList.length * 2; ++i) {
             if (!this.passedTurns.has(this.turn - i)) {
                 return false;
             }
@@ -379,7 +381,6 @@ export class Game {
     }
 
     @action.bound public async initialize(networkId?: string): Promise<void> {
-        this.networkMode = NetworkMode.CONNECTING;
         setInterval(
             action(() => {
                 if (this.isGameOver) {
@@ -416,17 +417,9 @@ export class Game {
             },
         };
         this.peer = networkId
-            ? await createClient(options, networkId)
-            : await createHost({ ...options, pingInterval: 10 });
+            ? await createObservableClient(options, networkId)
+            : await createObservableHost({ ...options, pingInterval: 10 });
 
-
-        for (const user of this.peer.users) {
-            this.users.set(user.id, user);
-        }
-
-        this.userId = this.peer.userId;
-        this.networkId = this.peer.hostConnectionId;
-        this.networkMode = this.peer.networkMode;
 
         this.messageRestart = this.peer.message<MessageRestart>(MessageType.RESTART);
         this.messagePass = this.peer.message<MessagePass>(MessageType.PASS);
@@ -534,14 +527,6 @@ export class Game {
                 this.passedTurns.add(this.turn);
                 this.nextTurn();
             }),
-        );
-        this.peer.on(
-            "userconnect",
-            action((user) => this.users.set(user.id, user)),
-        );
-        this.peer.on(
-            "userdisconnect",
-            action((userId) => this.users.delete(userId)),
         );
     }
 }
