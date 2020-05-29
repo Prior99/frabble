@@ -34,7 +34,7 @@ export function wordsEqual(a: Word, b: Word): boolean {
 }
 
 export class Board {
-    @observable private cells: Cell[] = new Array(15 * 15).fill({ empty: true });
+    @observable public cells: Cell[] = new Array(15 * 15).fill({ empty: true });
     private readonly rect = rect(-7, -7, 15, 15);
 
     constructor() {

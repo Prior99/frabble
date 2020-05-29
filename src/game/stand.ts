@@ -8,8 +8,12 @@ export class Stand {
 
     @observable public letters = new Map<number, Letter | undefined>();
 
-    constructor(letters: Letter[]) {
-        this.add(...letters);
+    constructor(letters: Map<number, Letter | undefined> | Letter[]) {
+        if (Array.isArray(letters)) {
+            this.add(...letters);
+        } else {
+            this.letters = letters;
+        }
     }
 
     @computed private get count(): number {

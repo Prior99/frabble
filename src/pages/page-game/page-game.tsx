@@ -5,12 +5,15 @@ import { observer } from "mobx-react";
 import { LobbyMode, GameState } from "../../types";
 import "./page-game.scss";
 import { Game } from "../../game";
-import { Lobby, GameContainer } from "../../ui";
+import { Lobby, GameContainer, DisconnectedModal } from "../../ui";
 import { invariant } from "../../utils";
+import { ReconnectModal, ConnectLoader } from "p2p-networking-semantic-ui-react";
+import { computed } from "mobx";
 
 export interface PageGameProps {
     lobbyMode: LobbyMode;
-    id?: string;
+    peerId?: string;
+    userId?: string;
 }
 
 @external
@@ -19,14 +22,19 @@ export class PageGame extends React.Component<RouteProps<PageGameProps>> {
     @inject private game!: Game;
 
     async componentDidMount(): Promise<void> {
-        if (this.props.match.params.lobbyMode === LobbyMode.HOST) {
+        const { lobbyMode, peerId, userId } = this.props.match.params;
+        if (lobbyMode === LobbyMode.HOST) {
             await this.game.initialize();
         } else {
-            await this.game.initialize(this.props.match.params.id!);
+            if (userId) {
+                await this.game.initialize(peerId!, userId!);
+            } else {
+                await this.game.initialize(peerId!);
+            }
         }
     }
 
-    public render(): JSX.Element {
+    @computed private get content(): JSX.Element {
         switch (this.game.state) {
             case GameState.LOBBY:
                 return <Lobby className="PageGame__lobby" />;
@@ -36,17 +44,31 @@ export class PageGame extends React.Component<RouteProps<PageGameProps>> {
                 invariant(this.game.state);
         }
     }
+
+    public render(): JSX.Element {
+        return (
+            <div>
+                <DisconnectedModal />
+                <ReconnectModal peer={this.game.peer} />
+                <ConnectLoader peer={this.game.peer} />
+                {this.content}
+            </div>
+        );
+    }
 }
 
 export const routeGame = addRoute<PageGameProps>({
-    path: (lobbyMode: LobbyMode, id?: string) => {
+    path: (lobbyMode: LobbyMode, peerId?: string, userId?: string) => {
         switch (lobbyMode) {
             case LobbyMode.CLIENT:
-                return `/game/client/${id}`;
+                if (userId) {
+                    return `/game/client/${peerId}/userId`;
+                }
+                return `/game/client/${peerId}`;
             case LobbyMode.HOST:
                 return `/game/host`;
         }
     },
-    pattern: "/game/:lobbyMode/:id?",
+    pattern: "/game/:lobbyMode/:peerId?/:userId?",
     component: PageGame,
 });

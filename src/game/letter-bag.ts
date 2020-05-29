@@ -5,8 +5,19 @@ import { action, computed, observable } from "mobx";
 import { getLetterOccurence, allLetters } from "./letters";
 
 export class LetterBag {
-    @observable private letters: Letter[] = [];
+    @observable public letters: Letter[] = [];
     private rng?: RandomSeed;
+
+    public reinitialize(seed: string, letters: Letter[]): void {
+        this.rng = randomSeed(seed);
+        this.refill();
+        this.letters = this.letters.slice(0, letters.length);
+        for (let i = 0; i < this.letters.length; ++i) {
+            if (this.letters[i] !== letters[i]) {
+                throw new Error("Letter bags out of sync.");
+            }
+        }
+    }
 
     public initialize(seed: string): void {
         this.rng = randomSeed(seed);

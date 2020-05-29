@@ -2,13 +2,19 @@
 
 .Lobby {
     &__idMessage {
-        width: 300px;
+        width: 800px;
         cursor: pointer;
 
         &.positive {
             border-color: color("secondary1", 4) !important;
             color: color("secondary1", 0) !important;
             background-color: lighten(color("secondary1", 1), 25%) !important;
+
+            .header {
+                border-color: color("secondary1", 4) !important;
+                color: color("secondary1", 0) !important;
+                background-color: lighten(color("secondary1", 1), 25%) !important;
+            }
         }
 
         p {
@@ -17,7 +23,7 @@
     }
 
     &__grid {
-        width: 300px;
+        width: 800px;
     }
 
     &__startButton {
