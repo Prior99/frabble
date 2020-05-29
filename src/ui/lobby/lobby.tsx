@@ -19,6 +19,9 @@ import "./lobby.scss";
 import { getLanguages, getFlagIcon, getLanguageName } from "../../utils";
 import { NetworkMode } from "p2p-networking";
 import { IdMessage, UserTable } from "p2p-networking-semantic-ui-react";
+import classNames from "classnames";
+
+declare const SOFTWARE_VERSION: string;
 
 export interface LobbyProps {
     className?: string;
@@ -103,13 +106,18 @@ export class Lobby extends React.Component<LobbyProps> {
 
     public render(): JSX.Element {
         return (
-            <MenuContainer className={this.props.className}>
+            <MenuContainer className={classNames("Lobby", this.props.className)}>
                 <Grid className="Lobby__grid">
                     <Grid.Row>
                         <Grid.Column>
                             <Segment>
                                 {this.game.peer && (
-                                    <UserTable basic="very" unstackable nameFactory={(user: AppUser) => user.name} peer={this.game.peer} />
+                                    <UserTable
+                                        basic="very"
+                                        unstackable
+                                        nameFactory={(user: AppUser) => user.name}
+                                        peer={this.game.peer}
+                                    />
                                 )}
                                 <Form>
                                     <Form.Field error={!this.nameValid}>
@@ -168,6 +176,7 @@ export class Lobby extends React.Component<LobbyProps> {
                         </Grid.Column>
                     </Grid.Row>
                 </Grid>
+                <div className="Lobby__version">{`Version #${SOFTWARE_VERSION}`}</div>
             </MenuContainer>
         );
     }

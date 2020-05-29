@@ -29,6 +29,8 @@ import { Stand } from "../game/stand";
 import { PeerOptions, NetworkMode, MessageFactory } from "p2p-networking";
 import { ObservablePeer, createObservableClient, createObservableHost } from "p2p-networking-mobx";
 
+declare const SOFTWARE_VERSION: string;
+
 export interface Score {
     rank: number;
     score: number;
@@ -417,7 +419,7 @@ export class Game {
 
         const user = { name: NomineLipsum.full() };
         const options: PeerOptions<AppUser> = {
-            applicationProtocolVersion: "0.0.0",
+            applicationProtocolVersion: `${SOFTWARE_VERSION}`,
             peerJsOptions: {
                 host: "peerjs.92k.de",
                 secure: true,

@@ -47,7 +47,7 @@ export class PageGame extends React.Component<RouteProps<PageGameProps>> {
 
     public render(): JSX.Element {
         return (
-            <div>
+            <div className="PageGame">
                 <DisconnectedModal />
                 <ReconnectModal peer={this.game.peer} />
                 <ConnectLoader peer={this.game.peer} />
