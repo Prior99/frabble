@@ -116,7 +116,7 @@ export class GameContainer extends React.Component<GameContainerProps> {
                                     <div className="GameContainer__statusContainer">
                                         <Segment className="GameContainer__sidebarSegment">
                                             <Status className="GameContainer__status" />
-                                            {this.game.showProgress && (
+                                            {this.game.showProgress && !this.game.paused && (
                                                 <Progress
                                                     className="GameContainer__progress"
                                                     percent={this.game.progressPercent}

@@ -183,9 +183,12 @@ export class Game {
         }
 
         this.loading.add(LoadingFeatures.PASS);
-        await this.messagePass.send({ exchangedLetters: this.lettersToExchange }).waitForAll();
-        this.loading.add(LoadingFeatures.PASS);
-        this.lettersToExchange = undefined;
+        try {
+            await this.messagePass.send({ exchangedLetters: this.lettersToExchange }).waitForAll();
+        } finally {
+            this.loading.delete(LoadingFeatures.PASS);
+            this.lettersToExchange = undefined;
+        }
     }
 
     @action.bound public abortPassing(): void {
@@ -382,6 +385,10 @@ export class Game {
         }
     }
 
+    @computed public get paused(): boolean {
+        return (this.peer?.disconnectedUsers.length ?? 0) > 0;
+    }
+
     @action.bound public async initialize(networkId?: string, userId?: string): Promise<void> {
         setInterval(
             action(() => {
@@ -391,7 +398,7 @@ export class Game {
                 if (!this.times || this.times.fromTurn !== this.turn) {
                     return;
                 }
-                if (isAfter(this.times.now!, this.times.deadline!)) {
+                if (isAfter(this.times.now!, this.times.deadline!) && this.peer?.disconnectedUsers.length === 0) {
                     if (this.currentUserId === this.user?.id) {
                         this.times = undefined;
                         this.loading.add(LoadingFeatures.PASS);
@@ -549,6 +556,9 @@ export class Game {
             },
         );
         this.peer.on("userreconnect", (user) => {
+            if (this.times) {
+                this.times.deadline = addSeconds(Date.now(), this.config.timeLimit ?? 0);
+            }
             if (!this.peer?.isHost) {
                 return;
             }
